@@ -142,7 +142,6 @@
           const payload = msg.data || msg;
           const eventName = (msg.event || msg.type || "").toLowerCase();
 
-          // 1. Update jumlah penonton aktif (VIEWERS) saat Live
           let current = null;
           if (typeof payload.viewerCount === "number") {
             current = payload.viewerCount;
@@ -161,13 +160,11 @@
             lastViewers = current;
           }
 
-          // 2. Tambah hitungan total penonton masuk (TOTAL) saat Live
           if (eventName === "member" || eventName === "join") {
             totalViews += 1;
             document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
           }
 
-          // 3. Pemicu Tes lewat tombol Simulate (Follow / Like / Gift) di TikFinity
           if (eventName === "follow" || eventName === "like" || eventName === "gift") {
             simViewers += 1;
             totalViews += 1;
