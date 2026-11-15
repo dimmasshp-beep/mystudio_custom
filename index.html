@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
         }
 
         body {
@@ -18,162 +18,188 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding-top: 20px;
+            padding: 15px;
         }
 
-        .overlay-container {
-            background: rgba(18, 18, 24, 0.85);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            padding: 14px 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(6px);
-            min-width: 340px;
-        }
-
-        .banner-text {
+        .overlay-wrapper {
+            background: rgba(15, 15, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px 18px;
+            width: 340px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
             color: #ffffff;
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-            background: linear-gradient(90deg, #ff0050, #00f2fe);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .stats-row {
+        /* Teks Berjalan (Marquee) */
+        .marquee-box {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .marquee-track {
+            display: inline-block;
+            animation: scrollText 8s linear infinite;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .marquee-track span {
+            margin-right: 40px;
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Baris Status LIVE & Penghitung */
+        .bottom-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            width: 100%;
-            gap: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 10px;
+            gap: 10px;
         }
 
         .live-badge {
             background-color: #fe2c55;
             color: #ffffff;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
             letter-spacing: 1px;
-            box-shadow: 0 0 12px rgba(254, 44, 85, 0.6);
         }
 
         .live-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background-color: #ffffff;
             border-radius: 50%;
-            animation: pulse 1.2s infinite;
+            animation: blink 1s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
-        .stat-box {
+        .counter-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.06);
-            padding: 6px 14px;
-            border-radius: 10px;
-            flex: 1;
+            gap: 12px;
         }
 
-        .stat-label {
-            color: #a0a0b0;
-            font-size: 11px;
+        .counter-box {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 82px;
+        }
+
+        .counter-label {
+            display: block;
+            font-size: 10px;
             font-weight: 700;
-            letter-spacing: 1px;
+            color: #b0b0c0;
+            letter-spacing: 0.8px;
         }
 
-        .stat-value {
-            color: #ffffff;
-            font-size: 20px;
+        .counter-value {
+            display: block;
+            font-size: 17px;
             font-weight: 800;
-            margin-top: 2px;
+            color: #ffffff;
+            margin-top: 1px;
         }
     </style>
 </head>
 <body>
 
-    <div class="overlay-container">
-        <div class="banner-text">Support Doa dan Follow</div>
-        
-        <div class="stats-row">
+    <div class="overlay-wrapper">
+        <div class="marquee-box">
+            <div class="marquee-track">
+                <span>Support Doa dan Follow</span>
+                <span>Support Doa dan Follow</span>
+            </div>
+        </div>
+
+        <div class="bottom-row">
             <div class="live-badge">
                 <div class="live-dot"></div>
                 LIVE
             </div>
 
-            <div class="stat-box">
-                <span class="stat-label">VIEWERS</span>
-                <span class="stat-value" id="viewers">0</span>
-            </div>
+            <div class="counter-group">
+                <div class="counter-box">
+                    <span class="counter-label">VIEWERS</span>
+                    <span class="counter-value" id="viewers">0</span>
+                </div>
 
-            <div class="stat-box">
-                <span class="stat-label">TOTAL</span>
-                <span class="stat-value" id="total">0</span>
+                <div class="counter-box">
+                    <span class="counter-label">TOTAL</span>
+                    <span class="counter-value" id="total">0</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let totalViewers = 0;
+        let totalCount = 0;
+        let simViewers = 0;
 
-        function connectTikFinity() {
-            const socket = new WebSocket('ws://localhost:21213/');
+        function startTikFinitySocket() {
+            const ws = new WebSocket('ws://localhost:21213/');
 
-            socket.onopen = function() {
-                console.log('Terhubung ke TikFinity WebSocket');
+            ws.onopen = function() {
+                console.log('Koneksi TikFinity Aktif');
             };
 
-            socket.onmessage = function(event) {
+            ws.onmessage = function(event) {
                 try {
-                    const msg = JSON.parse(event.data);
+                    const packet = JSON.parse(event.data);
 
-                    // Update jumlah penonton aktif (VIEWERS)
-                    if (msg.event === 'roomUser' && msg.data && typeof msg.data.viewerCount !== 'undefined') {
-                        document.getElementById('viewers').innerText = msg.data.viewerCount.toLocaleString('id-ID');
+                    // 1. Data Penonton Aktif (VIEWERS) saat Live
+                    if (packet.event === 'roomUser' && packet.data && typeof packet.data.viewerCount !== 'undefined') {
+                        document.getElementById('viewers').innerText = packet.data.viewerCount.toLocaleString('id-ID');
                     }
 
-                    // Tambah hitungan total penonton masuk (TOTAL)
-                    if (msg.event === 'member') {
-                        totalViewers += 1;
-                        document.getElementById('total').innerText = totalViewers.toLocaleString('id-ID');
+                    // 2. Data Penonton Masuk (TOTAL) saat Live
+                    if (packet.event === 'member') {
+                        totalCount += 1;
+                        document.getElementById('total').innerText = totalCount.toLocaleString('id-ID');
                     }
-                } catch (e) {
-                    console.error('Gagal membaca data:', e);
+
+                    // 3. Otomatis jalan saat tombol Simulate (Follow / Like / Gift) ditekan di TikFinity
+                    if (packet.event === 'follow' || packet.event === 'like' || packet.event === 'gift') {
+                        simViewers += 1;
+                        totalCount += 1;
+                        document.getElementById('viewers').innerText = simViewers.toLocaleString('id-ID');
+                        document.getElementById('total').innerText = totalCount.toLocaleString('id-ID');
+                    }
+                } catch (err) {
+                    console.error('Error parsing TikFinity data:', err);
                 }
             };
 
-            socket.onclose = function() {
-                // Otomatis mencoba menyambung ulang setiap 3 detik jika terputus
-                setTimeout(connectTikFinity, 3000);
+            ws.onclose = function() {
+                setTimeout(startTikFinitySocket, 3000);
             };
 
-            socket.onerror = function() {
-                socket.close();
+            ws.onerror = function() {
+                ws.close();
             };
         }
 
-        // Jalankan koneksi saat halaman dimuat
-        connectTikFinity();
+        startTikFinitySocket();
     </script>
 
 </body>
