@@ -1,206 +1,192 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live Overlay</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<style>
+  @import url('https://googleapis.com');
 
-        body {
-            background-color: transparent;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 15px;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .overlay-wrapper {
-            background: rgba(15, 15, 20, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 12px 18px;
-            width: 340px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-            color: #ffffff;
-        }
+  body {
+    background-color: transparent;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-        /* Teks Berjalan (Marquee) */
-        .marquee-box {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
+  /* Teks Berjalan Kuning */
+  .ticker-wrap {
+    width: 460px;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-bottom: 18px;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
 
-        .marquee-track {
-            display: inline-block;
-            animation: scrollText 8s linear infinite;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
+  .ticker-move {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 10s linear infinite;
+  }
 
-        .marquee-track span {
-            margin-right: 40px;
-        }
+  .ticker-text {
+    font-size: 28px;
+    font-weight: 900;
+    color: #0b0b0e;
+    -webkit-text-stroke: 2px #ffcc00;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+    margin-right: 60px;
+  }
 
-        @keyframes scrollText {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
-        }
+  @keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
 
-        /* Baris Status LIVE & Penghitung */
-        .bottom-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
+  /* Kapsul Live Stats */
+  .stats-pill-wrapper {
+    position: relative;
+    border-radius: 999px;
+    padding: 2px;
+    background: linear-gradient(125deg, rgba(255,255,255,0.06) 45%, #38f2ff 72%, #8a5cf6 95%);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  }
 
-        .live-badge {
-            background-color: #fe2c55;
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 800;
-            padding: 6px 12px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 1px;
-        }
+  .stats-pill-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: 22%;
+    width: 90px;
+    height: 3px;
+    background: #4ef5ff;
+    filter: blur(4px);
+    border-radius: 50%;
+  }
 
-        .live-dot {
-            width: 7px;
-            height: 7px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
+  .stats-pill {
+    background-color: #0d0e12;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    padding: 14px 34px;
+    gap: 26px;
+  }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+  .live-badge { display: flex; align-items: center; gap: 10px; }
 
-        .counter-group {
-            display: flex;
-            gap: 12px;
-        }
+  .red-dot {
+    width: 12px; height: 12px;
+    background-color: #ff1e56;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff1e56, 0 0 18px rgba(255, 30, 86, 0.6);
+    animation: pulse 1.5s infinite;
+  }
 
-        .counter-box {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 5px 12px;
-            border-radius: 8px;
-            text-align: center;
-            min-width: 82px;
-        }
+  @keyframes pulse {
+    0%, 100% { transform: scale(0.95); opacity: 0.85; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
 
-        .counter-label {
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            color: #b0b0c0;
-            letter-spacing: 0.8px;
-        }
-
-        .counter-value {
-            display: block;
-            font-size: 17px;
-            font-weight: 800;
-            color: #ffffff;
-            margin-top: 1px;
-        }
-    </style>
+  .live-text { color: #ff1e56; font-size: 16px; font-weight: 800; letter-spacing: 1.5px; }
+  .divider { width: 1px; height: 34px; background-color: rgba(255, 255, 255, 0.14); }
+  .stat-group { display: flex; flex-direction: column; align-items: flex-start; min-width: 75px; }
+  .stat-label { color: #8c8f99; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 2px; }
+  .stat-value { color: #ffffff; font-size: 24px; font-weight: 800; line-height: 1; }
+</style>
 </head>
 <body>
 
-    <div class="overlay-wrapper">
-        <div class="marquee-box">
-            <div class="marquee-track">
-                <span>Support Doa dan Follow</span>
-                <span>Support Doa dan Follow</span>
-            </div>
-        </div>
-
-        <div class="bottom-row">
-            <div class="live-badge">
-                <div class="live-dot"></div>
-                LIVE
-            </div>
-
-            <div class="counter-group">
-                <div class="counter-box">
-                    <span class="counter-label">VIEWERS</span>
-                    <span class="counter-value" id="viewers">0</span>
-                </div>
-
-                <div class="counter-box">
-                    <span class="counter-label">TOTAL</span>
-                    <span class="counter-value" id="total">0</span>
-                </div>
-            </div>
-        </div>
+  <div class="ticker-wrap">
+    <div class="ticker-move">
+      <span class="ticker-text">Support Doa dan Follow</span>
+      <span class="ticker-text">Support Doa dan Follow</span>
     </div>
+  </div>
 
-    <script>
-        let totalCount = 0;
-        let simViewers = 0;
+  <div class="stats-pill-wrapper">
+    <div class="stats-pill">
+      <div class="live-badge">
+        <div class="red-dot"></div>
+        <span class="live-text">LIVE</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-group">
+        <span class="stat-label">VIEWERS</span>
+        <span class="stat-value" id="viewer-count">0</span>
+      </div>
+      <div class="stat-group">
+        <span class="stat-label">TOTAL</span>
+        <span class="stat-value" id="total-count">0</span>
+      </div>
+    </div>
+  </div>
 
-        function startTikFinitySocket() {
-            const ws = new WebSocket('ws://localhost:21213/');
+  <script>
+    let totalViews = 0;
+    let lastViewers = 0;
+    let simViewers = 0;
 
-            ws.onopen = function() {
-                console.log('Koneksi TikFinity Aktif');
-            };
+    function connectSocket() {
+      const ws = new WebSocket("ws://localhost:21213/");
 
-            ws.onmessage = function(event) {
-                try {
-                    const packet = JSON.parse(event.data);
+      ws.onmessage = function(event) {
+        try {
+          const msg = JSON.parse(event.data);
+          const payload = msg.data || msg;
+          const eventName = (msg.event || msg.type || "").toLowerCase();
 
-                    // 1. Data Penonton Aktif (VIEWERS) saat Live
-                    if (packet.event === 'roomUser' && packet.data && typeof packet.data.viewerCount !== 'undefined') {
-                        document.getElementById('viewers').innerText = packet.data.viewerCount.toLocaleString('id-ID');
-                    }
+          // 1. Update jumlah penonton aktif (VIEWERS) saat Live
+          let current = null;
+          if (typeof payload.viewerCount === "number") {
+            current = payload.viewerCount;
+          } else if (typeof payload.viewers === "number") {
+            current = payload.viewers;
+          } else if (payload.roomInfo && typeof payload.roomInfo.viewerCount === "number") {
+            current = payload.roomInfo.viewerCount;
+          }
 
-                    // 2. Data Penonton Masuk (TOTAL) saat Live
-                    if (packet.event === 'member') {
-                        totalCount += 1;
-                        document.getElementById('total').innerText = totalCount.toLocaleString('id-ID');
-                    }
+          if (current !== null) {
+            document.getElementById("viewer-count").innerText = current.toLocaleString("id-ID");
+            if (current > lastViewers) {
+              totalViews += (current - lastViewers);
+              document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
+            }
+            lastViewers = current;
+          }
 
-                    // 3. Otomatis jalan saat tombol Simulate (Follow / Like / Gift) ditekan di TikFinity
-                    if (packet.event === 'follow' || packet.event === 'like' || packet.event === 'gift') {
-                        simViewers += 1;
-                        totalCount += 1;
-                        document.getElementById('viewers').innerText = simViewers.toLocaleString('id-ID');
-                        document.getElementById('total').innerText = totalCount.toLocaleString('id-ID');
-                    }
-                } catch (err) {
-                    console.error('Error parsing TikFinity data:', err);
-                }
-            };
+          // 2. Tambah hitungan total penonton masuk (TOTAL) saat Live
+          if (eventName === "member" || eventName === "join") {
+            totalViews += 1;
+            document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
+          }
 
-            ws.onclose = function() {
-                setTimeout(startTikFinitySocket, 3000);
-            };
+          // 3. Pemicu Tes lewat tombol Simulate (Follow / Like / Gift) di TikFinity
+          if (eventName === "follow" || eventName === "like" || eventName === "gift") {
+            simViewers += 1;
+            totalViews += 1;
+            document.getElementById("viewer-count").innerText = simViewers.toLocaleString("id-ID");
+            document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
+          }
+        } catch (e) {}
+      };
 
-            ws.onerror = function() {
-                ws.close();
-            };
-        }
+      ws.onclose = function() {
+        setTimeout(connectSocket, 3000);
+      };
 
-        startTikFinitySocket();
-    </script>
+      ws.onerror = function() {
+        ws.close();
+      };
+    }
 
+    connectSocket();
+  </script>
 </body>
 </html>
