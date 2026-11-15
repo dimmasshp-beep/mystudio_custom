@@ -135,26 +135,36 @@
 
     <script>
         let totalViewers = 0;
+        let testViewers = 0;
 
         function connectTikFinity() {
             const socket = new WebSocket('ws://localhost:21213/');
 
             socket.onopen = function() {
-                console.log('Terhubung ke TikFinity WebSocket');
+                // Indikator awal bahwa jalur ke TikFinity berhasil terhubung
+                console.log('Terhubung ke TikFinity!');
             };
 
             socket.onmessage = function(event) {
                 try {
                     const msg = JSON.parse(event.data);
 
-                    // Update jumlah penonton aktif (VIEWERS)
+                    // 1. Update jumlah penonton asli saat Live (VIEWERS)
                     if (msg.event === 'roomUser' && msg.data && typeof msg.data.viewerCount !== 'undefined') {
                         document.getElementById('viewers').innerText = msg.data.viewerCount.toLocaleString('id-ID');
                     }
 
-                    // Tambah hitungan total penonton masuk (TOTAL)
+                    // 2. Tambah hitungan total penonton masuk saat Live (TOTAL)
                     if (msg.event === 'member') {
                         totalViewers += 1;
+                        document.getElementById('total').innerText = totalViewers.toLocaleString('id-ID');
+                    }
+
+                    // 3. Pemicu Tes lewat tombol Simulate (Follow / Like / Gift) di TikFinity
+                    if (msg.event === 'follow' || msg.event === 'like' || msg.event === 'gift') {
+                        testViewers += 1;
+                        totalViewers += 1;
+                        document.getElementById('viewers').innerText = testViewers.toLocaleString('id-ID');
                         document.getElementById('total').innerText = totalViewers.toLocaleString('id-ID');
                     }
                 } catch (e) {
@@ -163,7 +173,6 @@
             };
 
             socket.onclose = function() {
-                // Otomatis mencoba menyambung ulang setiap 3 detik jika terputus
                 setTimeout(connectTikFinity, 3000);
             };
 
@@ -172,7 +181,6 @@
             };
         }
 
-        // Jalankan koneksi saat halaman dimuat
         connectTikFinity();
     </script>
 
