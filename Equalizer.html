@@ -6,11 +6,7 @@
 <title>TikTok LIVE Equalizer</title>
 <script src="https://jsdelivr.net"></script>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 100%;
     height: 100%;
@@ -22,8 +18,6 @@
     justify-content: center;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-
-  /* Kotak Kontrol Khusus Chrome */
   #senderBox {
     display: none;
     flex-direction: column;
@@ -47,23 +41,12 @@
     font-weight: 700;
     cursor: pointer;
   }
-  #connectBtn:hover {
-    opacity: 0.9;
-  }
-  #statusMsg {
-    font-size: 12px;
-    color: #bbb;
-    max-width: 300px;
-    line-height: 1.4;
-  }
-
-  /* Kanvas Equalizer */
+  #statusMsg { font-size: 12px; color: #bbb; max-width: 300px; line-height: 1.4; }
   canvas {
     width: 100%;
     max-width: 520px;
     height: 120px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
   }
 </style>
 </head>
@@ -87,15 +70,7 @@
     const canvas = document.getElementById('eqCanvas');
     const ctx = canvas.getContext('2d');
 
-    const CONFIG = {
-      barCount: 22,
-      maxBlocks: 12,
-      blockWidth: 18,
-      blockHeight: 5,
-      gapX: 5,
-      gapY: 3
-    };
-
+    const CONFIG = { barCount: 22, maxBlocks: 12, blockWidth: 18, blockHeight: 6, gapX: 5, gapY: 3 };
     let currentFreq = new Array(64).fill(0);
     let lastUpdate = 0;
 
@@ -103,7 +78,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const totalWidth = CONFIG.barCount * (CONFIG.blockWidth + CONFIG.gapX) - CONFIG.gapX;
       const startX = (canvas.width - totalWidth) / 2;
-      const baseY = canvas.height - 15;
+      const baseY = canvas.height - 22;
 
       for (let i = 0; i < CONFIG.barCount; i++) {
         const freqIndex = Math.floor((i / CONFIG.barCount) * (freqArray.length * 0.65));
@@ -113,20 +88,17 @@
 
         for (let b = 0; b < activeBlocks; b++) {
           const y = baseY - b * (CONFIG.blockHeight + CONFIG.gapY);
-          ctx.fillStyle = (b === activeBlocks - 1 && activeBlocks > 2)
-            ? "rgba(255, 255, 255, 0.75)"
-            : "rgba(255, 255, 255, 0.95)";
+          ctx.fillStyle = "#FFFFFF";
           ctx.fillRect(x, y, CONFIG.blockWidth, CONFIG.blockHeight);
         }
       }
     }
 
-    // ====================================================
-    // MODE 1: WIDGET TIKTOK LIVE STUDIO (?view=widget)
-    // ====================================================
     if (isWidget) {
-      const peer = new Peer(PEER_ID);
+      senderBox.remove();
+      drawEqualizer(currentFreq);
 
+      const peer = new Peer(PEER_ID);
       peer.on('connection', (conn) => {
         conn.on('data', (payload) => {
           if (payload && payload.freq) {
@@ -144,10 +116,6 @@
         drawEqualizer(currentFreq);
       }
       renderWidget();
-
-    // ====================================================
-    // MODE 2: PENGIRIM AUDIO DI CHROME
-    // ====================================================
     } else {
       senderBox.style.display = 'flex';
       document.body.style.background = '#111111';
@@ -172,11 +140,7 @@
         try {
           const stream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
-            }
+            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
           });
 
           const audioTracks = stream.getAudioTracks();
@@ -186,13 +150,11 @@
             return;
           }
 
-          if (!conn || !conn.open) {
-            linkToLiveStudio();
-          }
+          if (!conn || !conn.open) linkToLiveStudio();
 
           connectBtn.textContent = "Aktif & Mengirim Suara";
           connectBtn.style.background = "#00c853";
-          statusMsg.innerHTML = "Equalizer di <b>TikTok LIVE Studio</b> sekarang mengikuti suara Chrome secara otomatis.";
+          statusMsg.innerHTML = "Equalizer di <b>TikTok LIVE Studio</b> sekarang mengikuti suara Chrome.";
 
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           if (audioCtx.state === 'suspended') await audioCtx.resume();
@@ -209,21 +171,16 @@
             requestAnimationFrame(sendLoop);
             analyser.getByteFrequencyData(dataArray);
             const list = Array.from(dataArray);
-
             drawEqualizer(list);
-            if (conn && conn.open) {
-              conn.send({ freq: list });
-            }
+            if (conn && conn.open) conn.send({ freq: list });
           }
           sendLoop();
 
-          // Perbaikan indeks array [0] agar tidak error
-          audioTracks[0].onended = () => {
+          audioTracks.onended = () => {
             connectBtn.textContent = "Hubungkan Audio Chrome";
             connectBtn.style.background = "#fe2c55";
             statusMsg.textContent = "Koneksi dihentikan. Klik tombol di atas untuk menghubungkan ulang.";
           };
-
         } catch (err) {
           statusMsg.textContent = "Dibatalkan: " + err.message;
         }
