@@ -49,28 +49,46 @@
     100% { transform: translate3d(-100%, 0, 0); }
   }
 
-  /* Kapsul Live Stats */
+  /* Kapsul Live Stats dengan Garis Kebiruan Berputar */
   .stats-pill-wrapper {
     position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 999px;
-    padding: 2px;
-    background: linear-gradient(125deg, rgba(255,255,255,0.06) 45%, #38f2ff 72%, #8a5cf6 95%);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    padding: 3px; /* Ketebalan garis kebiruan di luar kapsul */
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 18px rgba(56, 242, 255, 0.25);
   }
 
+  /* Cahaya garis kebiruan yang berputar */
   .stats-pill-wrapper::before {
     content: "";
     position: absolute;
-    top: -1px;
-    right: 22%;
-    width: 90px;
-    height: 3px;
-    background: #4ef5ff;
-    filter: blur(4px);
-    border-radius: 50%;
+    width: 550px;
+    height: 550px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 220deg,
+      #0284c7 275deg,
+      #38f2ff 330deg,
+      #ffffff 355deg,
+      transparent 360deg
+    );
+    animation: spin-border 3s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes spin-border {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .stats-pill {
+    position: relative;
+    z-index: 1;
     background-color: #0d0e12;
     border-radius: 999px;
     display: flex;
