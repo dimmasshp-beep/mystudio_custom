@@ -5,7 +5,11 @@
 <style>
   @import url('https://googleapis.com');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   body {
     background-color: transparent;
@@ -17,36 +21,6 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-  }
-
-  /* Teks Berjalan Kuning */
-  .ticker-wrap {
-    width: 460px;
-    overflow: hidden;
-    white-space: nowrap;
-    margin-bottom: 18px;
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  }
-
-  .ticker-move {
-    display: inline-block;
-    padding-left: 100%;
-    animation: ticker 10s linear infinite;
-  }
-
-  .ticker-text {
-    font-size: 28px;
-    font-weight: 900;
-    color: #0b0b0e;
-    -webkit-text-stroke: 2px #ffcc00;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
-    margin-right: 60px;
-  }
-
-  @keyframes ticker {
-    0% { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-100%, 0, 0); }
   }
 
   /* Kapsul Live Stats dengan Garis Kebiruan Berputar */
@@ -97,10 +71,15 @@
     gap: 26px;
   }
 
-  .live-badge { display: flex; align-items: center; gap: 10px; }
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
   .red-dot {
-    width: 12px; height: 12px;
+    width: 12px;
+    height: 12px;
     background-color: #ff1e56;
     border-radius: 50%;
     box-shadow: 0 0 10px #ff1e56, 0 0 18px rgba(255, 30, 86, 0.6);
@@ -112,21 +91,43 @@
     50% { transform: scale(1.15); opacity: 1; }
   }
 
-  .live-text { color: #ff1e56; font-size: 16px; font-weight: 800; letter-spacing: 1.5px; }
-  .divider { width: 1px; height: 34px; background-color: rgba(255, 255, 255, 0.14); }
-  .stat-group { display: flex; flex-direction: column; align-items: flex-start; min-width: 75px; }
-  .stat-label { color: #8c8f99; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 2px; }
-  .stat-value { color: #ffffff; font-size: 24px; font-weight: 800; line-height: 1; }
+  .live-text {
+    color: #ff1e56;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+  }
+
+  .divider {
+    width: 1px;
+    height: 34px;
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .stat-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 75px;
+  }
+
+  .stat-label {
+    color: #8c8f99;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    margin-bottom: 2px;
+  }
+
+  .stat-value {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+  }
 </style>
 </head>
 <body>
-
-  <div class="ticker-wrap">
-    <div class="ticker-move">
-      <span class="ticker-text">Support Doa dan Follow</span>
-      <span class="ticker-text">Support Doa dan Follow</span>
-    </div>
-  </div>
 
   <div class="stats-pill-wrapper">
     <div class="stats-pill">
@@ -146,62 +147,62 @@
     </div>
   </div>
 
-  <script>
-    let totalViews = 0;
-    let lastViewers = 0;
-    let simViewers = 0;
+<script>
+  let totalViews = 0;
+  let lastViewers = 0;
+  let simViewers = 0;
 
-    function connectSocket() {
-      const ws = new WebSocket("ws://localhost:21213/");
+  function connectSocket() {
+    const ws = new WebSocket("ws://localhost:21213/");
 
-      ws.onmessage = function(event) {
-        try {
-          const msg = JSON.parse(event.data);
-          const payload = msg.data || msg;
-          const eventName = (msg.event || msg.type || "").toLowerCase();
+    ws.onmessage = function(event) {
+      try {
+        const msg = JSON.parse(event.data);
+        const payload = msg.data || msg;
+        const eventName = (msg.event || msg.type || "").toLowerCase();
 
-          let current = null;
-          if (typeof payload.viewerCount === "number") {
-            current = payload.viewerCount;
-          } else if (typeof payload.viewers === "number") {
-            current = payload.viewers;
-          } else if (payload.roomInfo && typeof payload.roomInfo.viewerCount === "number") {
-            current = payload.roomInfo.viewerCount;
-          }
+        let current = null;
+        if (typeof payload.viewerCount === "number") {
+          current = payload.viewerCount;
+        } else if (typeof payload.viewers === "number") {
+          current = payload.viewers;
+        } else if (payload.roomInfo && typeof payload.roomInfo.viewerCount === "number") {
+          current = payload.roomInfo.viewerCount;
+        }
 
-          if (current !== null) {
-            document.getElementById("viewer-count").innerText = current.toLocaleString("id-ID");
-            if (current > lastViewers) {
-              totalViews += (current - lastViewers);
-              document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
-            }
-            lastViewers = current;
-          }
-
-          if (eventName === "member" || eventName === "join") {
-            totalViews += 1;
+        if (current !== null) {
+          document.getElementById("viewer-count").innerText = current.toLocaleString("id-ID");
+          if (current > lastViewers) {
+            totalViews += (current - lastViewers);
             document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
           }
+          lastViewers = current;
+        }
 
-          if (eventName === "follow" || eventName === "like" || eventName === "gift") {
-            simViewers += 1;
-            totalViews += 1;
-            document.getElementById("viewer-count").innerText = simViewers.toLocaleString("id-ID");
-            document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
-          }
-        } catch (e) {}
-      };
+        if (eventName === "member" || eventName === "join") {
+          totalViews += 1;
+          document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
+        }
 
-      ws.onclose = function() {
-        setTimeout(connectSocket, 3000);
-      };
+        if (eventName === "follow" || eventName === "like" || eventName === "gift") {
+          simViewers += 1;
+          totalViews += 1;
+          document.getElementById("viewer-count").innerText = simViewers.toLocaleString("id-ID");
+          document.getElementById("total-count").innerText = totalViews.toLocaleString("id-ID");
+        }
+      } catch (e) {}
+    };
 
-      ws.onerror = function() {
-        ws.close();
-      };
-    }
+    ws.onclose = function() {
+      setTimeout(connectSocket, 3000);
+    };
 
-    connectSocket();
-  </script>
+    ws.onerror = function() {
+      ws.close();
+    };
+  }
+
+  connectSocket();
+</script>
 </body>
 </html>
