@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7 Gift & Tantangan Overlay - Final Transparent</title>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: transparent; /* Transparan asli tanpa layar hijau/magenta */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .gift-container {
+      width: 440px;
+      background-color: rgba(43, 45, 49, 0.78); /* Abu-abu transparan langsung */
+      border-radius: 18px;
+      padding: 14px 18px;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Area Tampilan Pas 2 Baris */
+    .gift-viewport {
+      width: 100%;
+      height: 136px; /* Tinggi pas untuk 2 baris (2 x 68px) */
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gift-list {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Desain Per Baris */
+    .gift-item {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 4px 0;
+    }
+
+    /* Stiker / Gambar Gift */
+    .gift-icon-wrapper {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(56, 58, 64, 0.85);
+      border-radius: 12px;
+    }
+
+    .gift-emoji {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    /* Kolom Teks */
+    .gift-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .gift-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Nama Gift Small Caps */
+    .gift-name {
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.8px;
+      color: #d1d5db;
+      white-space: nowrap;
+    }
+
+    .badge-emoji {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Teks Tantangan Utama */
+    .gift-action {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+      white-space: nowrap;
+    }
+
+    /* Aksen Warna untuk Tantangan Spesial */
+    .gift-action.danger {
+      color: #ff8787;
+    }
+
+    .gift-action.special {
+      color: #69db7c;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gift-container">
+    <div class="gift-viewport" id="viewport">
+      <div class="gift-list" id="giftList">
+        
+        <!-- 1. MAWAR -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🌹</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴍᴀᴡᴀʀ</span>
+              <span class="badge-emoji">🧣</span>
+            </div>
+            <div class="gift-action">Roam Healer</div>
+          </div>
+        </div>
+
+        <!-- 2. DONAT -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🍩</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴅᴏɴᴀᴛ</span>
+              <span class="badge-emoji">🥨</span>
+            </div>
+            <div class="gift-action">Tangkis CC</div>
+          </div>
+        </div>
+
+        <!-- 3. CAHAYA BINTANG -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">✨</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴄᴀʜᴀʏᴀ ʙɪɴᴛᴀɴɢ</span>
+              <span class="badge-emoji">💫</span>
+            </div>
+            <div class="gift-action">Dorong Lord</div>
+          </div>
+        </div>
+
+        <!-- 4. BRAVO -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">👏</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ʙʀᴀᴠᴏ</span>
+              <span class="badge-emoji">🏵️</span>
+            </div>
+            <div class="gift-action">Full Sepatu</div>
+          </div>
+        </div>
+
+        <!-- 5. AKU CINTA KAMU -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🤟</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴀᴋᴜ ᴄɪɴᴛᴀ ᴋᴀᴍᴜ</span>
+              <span class="badge-emoji">💝</span>
+            </div>
+            <div class="gift-action">Retri Telat</div>
+          </div>
+        </div>
+
+        <!-- 6. PARFUM -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🧴</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴘᴀʀғᴜᴍ</span>
+              <span class="badge-emoji">🦢</span>
+            </div>
+            <div class="gift-action danger">Ulti Minion</div>
+          </div>
+        </div>
+
+        <!-- 7. PAUS MENYELAM -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🐳</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴘᴀᴜs ᴍᴇɴʏᴇʟᴀᴍ</span>
+              <span class="badge-emoji">🫧</span>
+            </div>
+            <div class="gift-action special">AFK WAR!</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const giftList = document.getElementById('giftList');
+    const items = document.querySelectorAll('.gift-item');
+    const visibleRows = 2;
+    const itemHeight = 68;
+    let currentIndex = 0;
+
+    function nextRow() {
+      currentIndex++;
+      if (currentIndex > items.length - visibleRows) {
+        currentIndex = 0;
+      }
+      giftList.style.transform = `translateY(-${currentIndex * itemHeight}px)`;
+    }
+
+    // Gulir otomatis ke bawah setiap 3 detik tanpa tombol
+    setInterval(nextRow, 3000);
+  </script>
+
+</body>
+</html>
