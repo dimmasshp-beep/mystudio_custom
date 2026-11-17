@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TikTok LIVE Equalizer</title>
-<script src="https://unpkg.com"></script>
 <style>
   * {
     margin: 0;
@@ -22,7 +21,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
-  /* Tampilan Kontrol Hanya untuk Chrome */
+  /* Kotak Kontrol di Chrome */
   #senderBox {
     display: none;
     flex-direction: column;
@@ -35,6 +34,7 @@
     color: #fff;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    z-index: 50;
   }
   #connectBtn {
     background: #fe2c55;
@@ -45,19 +45,22 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.2s;
+    transition: transform 0.15s ease;
   }
   #connectBtn:hover {
     transform: scale(1.04);
   }
+  #connectBtn:active {
+    transform: scale(0.97);
+  }
   #statusMsg {
     font-size: 13px;
-    color: #aaa;
-    max-width: 300px;
+    color: #bbb;
+    max-width: 310px;
     line-height: 1.5;
   }
 
-  /* Kanvas Equalizer Murni (Tanpa Tombol) */
+  /* Kanvas Equalizer */
   canvas {
     width: 100%;
     height: 100%;
@@ -69,7 +72,7 @@
 <body>
 
   <div id="senderBox">
-    <button id="connectBtn">Hubungkan Audio Chrome</button>
+    <button id="connectBtn" type="button">Hubungkan Audio Chrome</button>
     <p id="statusMsg">Klik tombol di atas, pilih tab <b>TikTok</b> atau <b>Seluruh Layar</b>, lalu centang <b>Bagikan audio</b>.</p>
   </div>
 
@@ -78,7 +81,6 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const isWidget = params.get('view') === 'widget';
-    const roomId = "dimmasshp-tiktok-eq-bridge-2026";
 
     const senderBox = document.getElementById('senderBox');
     const connectBtn = document.getElementById('connectBtn');
@@ -120,19 +122,29 @@
       }
     }
 
-    // ==========================================
-    // MODE 1: TIKTOK LIVE STUDIO (?view=widget)
-    // ==========================================
-    if (isWidget) {
-      const peer = new Peer(roomId);
+    // Saluran komunikasi lokal & sinkronisasi storage
+    const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('eq_audio_stream') : null;
 
-      peer.on('connection', (conn) => {
-        conn.on('data', (data) => {
-          if (data && data.freq) {
-            currentFreq = data.freq;
+    if (isWidget) {
+      // ==========================================
+      // MODE WIDGET TIKTOK LIVE STUDIO (?view=widget)
+      // ==========================================
+      if (bc) {
+        bc.onmessage = (e) => {
+          if (e.data && e.data.freq) {
+            currentFreq = e.data.freq;
             lastUpdate = Date.now();
           }
-        });
+        };
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'eq_freq_payload' && e.newValue) {
+          try {
+            currentFreq = JSON.parse(e.newValue);
+            lastUpdate = Date.now();
+          } catch (_) {}
+        }
       });
 
       function renderWidget() {
@@ -144,27 +156,26 @@
       }
       renderWidget();
 
-    // ==========================================
-    // MODE 2: GOOGLE CHROME (PENGIRIM AUDIO)
-    // ==========================================
     } else {
+      // ==========================================
+      // MODE CHROME (PENGIRIM & PREVIEW AUDIO)
+      // ==========================================
       senderBox.style.display = 'flex';
-      canvas.style.display = 'none';
+      canvas.style.display = 'block';
+      canvas.style.height = '120px';
+      canvas.style.marginTop = '20px';
+      document.body.style.flexDirection = 'column';
+      document.body.style.background = '#111111';
 
-      const peer = new Peer();
-      let dataConn = null;
-
-      function connectToWidget() {
-        dataConn = peer.connect(roomId);
-        dataConn.on('open', () => {
-          statusMsg.innerHTML = "Jembatan ke <b>TikTok LIVE Studio</b> siap! Klik tombol merah untuk mulai mengirim suara.";
-        });
-      }
-
-      peer.on('open', connectToWidget);
+      drawEqualizer(currentFreq);
 
       connectBtn.addEventListener('click', async () => {
         try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+            statusMsg.innerHTML = "<span style='color:#ff5252'>Browser ini tidak mendukung tangkapan audio layar. Gunakan Google Chrome versi terbaru.</span>";
+            return;
+          }
+
           const stream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
             audio: {
@@ -176,20 +187,20 @@
 
           const audioTracks = stream.getAudioTracks();
           if (audioTracks.length === 0) {
-            alert("Centang kotak 'Bagikan juga audio tab' atau 'Bagikan audio sistem' saat memilih layar!");
+            alert("Audio belum dicentang! Ulangi klik tombol lalu centang kotak 'Bagikan juga audio tab' atau 'Bagikan audio sistem'.");
             stream.getTracks().forEach(t => t.stop());
             return;
           }
 
-          if (!dataConn || !dataConn.open) {
-            connectToWidget();
-          }
-
-          connectBtn.textContent = "Aktif & Terhubung ke LIVE Studio";
+          connectBtn.textContent = "Terhubung & Aktif";
           connectBtn.style.background = "#00c853";
-          statusMsg.innerHTML = "Suara Chrome sedang dikirim otomatis ke <b>TikTok LIVE Studio</b>. Jangan tutup tab ini.";
+          statusMsg.innerHTML = "Suara terdeteksi! Equalizer di bawah ini dan di <b>TikTok LIVE Studio</b> sekarang bergerak otomatis.";
 
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+          }
+
           const source = audioCtx.createMediaStreamSource(stream);
           const analyser = audioCtx.createAnalyser();
           analyser.fftSize = 128;
@@ -198,23 +209,28 @@
 
           const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-          function sendAudioLoop() {
-            requestAnimationFrame(sendAudioLoop);
+          function processAudio() {
+            requestAnimationFrame(processAudio);
             analyser.getByteFrequencyData(dataArray);
-            if (dataConn && dataConn.open) {
-              dataConn.send({ freq: Array.from(dataArray) });
-            }
-          }
-          sendAudioLoop();
+            const freqList = Array.from(dataArray);
 
-          audioTracks.onended = () => {
+            // Tampilkan preview langsung di tab Chrome
+            drawEqualizer(freqList);
+
+            // Kirim sinyal ke widget
+            if (bc) bc.postMessage({ freq: freqList });
+            localStorage.setItem('eq_freq_payload', JSON.stringify(freqList));
+          }
+          processAudio();
+
+          audioTracks[0].onended = () => {
             connectBtn.textContent = "Hubungkan Audio Chrome";
             connectBtn.style.background = "#fe2c55";
-            statusMsg.textContent = "Koneksi audio terputus. Klik tombol di atas untuk menghubungkan ulang.";
+            statusMsg.textContent = "Koneksi dihentikan. Klik tombol di atas untuk menghubungkan ulang.";
           };
 
         } catch (err) {
-          console.error(err);
+          statusMsg.innerHTML = "<span style='color:#ffab40'>Dibatalkan atau izin ditolak: " + err.message + "</span>";
         }
       });
     }
