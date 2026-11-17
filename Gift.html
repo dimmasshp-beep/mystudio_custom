@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7 Gift & Tantangan Overlay - TikTok Live Studio</title>
+  <!-- Import Font Tebal yang Bersih dan Modern -->
+  <link href="https://googleapis.com" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    /* Layar Hijau untuk Chroma Key di TikTok Live Studio */
+    body {
+      background-color: #00ff00;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Kotak Utama Abu-Abu Transparan */
+    .gift-container {
+      width: 440px;
+      background: rgba(55, 58, 64, 0.72);
+      border-radius: 18px;
+      padding: 12px 18px 8px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Area Tampilan Pas 2 Baris */
+    .gift-viewport {
+      width: 100%;
+      height: 136px; /* Tinggi pas untuk 2 baris (2 x 68px) */
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+
+    .gift-list {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Desain Per Baris (Stiker Gift + Nama Gift + Keterangan Aksi) */
+    .gift-item {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 4px 0;
+    }
+
+    /* Stiker / Gambar Gift & Angka 1 */
+    .gift-icon-wrapper {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .gift-emoji {
+      font-size: 38px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    }
+
+    /* Angka Jumlah Gift (1) di Pojok Stiker */
+    .gift-count {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 0 5px;
+      border-radius: 6px;
+      line-height: 1.3;
+    }
+
+    /* Kolom Teks (Baris Atas: Nama Gift, Baris Bawah: Tantangan) */
+    .gift-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .gift-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Nama Gift Small Caps (Bersih tanpa outline kuning) */
+    .gift-name {
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.8px;
+      color: #d1d5db;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
+    }
+
+    .badge-emoji {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Teks Tantangan Utama (Bersih, Putih Cerah, Enak Dilihat) */
+    .gift-action {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+      white-space: nowrap;
+    }
+
+    /* Aksen Warna Lembut untuk Tantangan Spesial */
+    .gift-action.danger {
+      color: #ff8787;
+    }
+
+    .gift-action.special {
+      color: #69db7c;
+    }
+
+    /* Panah Bawah untuk Gulir Manual */
+    .scroll-indicator {
+      margin-top: 4px;
+      cursor: pointer;
+      opacity: 0.75;
+      animation: bounce 1.8s infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scroll-indicator svg {
+      width: 20px;
+      height: 20px;
+      stroke: #e5e7eb;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(3px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gift-container">
+    <div class="gift-viewport" id="viewport">
+      <div class="gift-list" id="giftList">
+        
+        <!-- 1. MAWAR -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🌹</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴍᴀᴡᴀʀ</span>
+              <span class="badge-emoji">🧣</span>
+            </div>
+            <div class="gift-action">Salah 1 warna</div>
+          </div>
+        </div>
+
+        <!-- 2. DONAT -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🍩</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴅᴏɴᴀᴛ</span>
+              <span class="badge-emoji">🥨</span>
+            </div>
+            <div class="gift-action">Putar 90°</div>
+          </div>
+        </div>
+
+        <!-- 3. CAHAYA BINTANG -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">✨</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴄᴀʜᴀʏᴀ ʙɪɴᴛᴀɴɢ</span>
+              <span class="badge-emoji">💫</span>
+            </div>
+            <div class="gift-action">Tanpa pinset 30d</div>
+          </div>
+        </div>
+
+        <!-- 4. BRAVO -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">👏</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ʙʀᴀᴠᴏ</span>
+              <span class="badge-emoji">🏵️</span>
+            </div>
+            <div class="gift-action">Senggol papan</div>
+          </div>
+        </div>
+
+        <!-- 5. AKU CINTA KAMU -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🤟</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴀᴋᴜ ᴄɪɴᴛᴀ ᴋᴀᴍᴜ</span>
+              <span class="badge-emoji">💝</span>
+            </div>
+            <div class="gift-action">Rusak 1 bagian</div>
+          </div>
+        </div>
+
+        <!-- 6. PARFUM -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🧴</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴘᴀʀғᴜᴍ</span>
+              <span class="badge-emoji">🦢</span>
+            </div>
+            <div class="gift-action danger">BALIK PAPAN!</div>
+          </div>
+        </div>
+
+        <!-- 7. PAUS MENYELAM -->
+        <div class="gift-item">
+          <div class="gift-icon-wrapper">
+            <span class="gift-emoji">🐳</span>
+            <span class="gift-count">1</span>
+          </div>
+          <div class="gift-info">
+            <div class="gift-title-row">
+              <span class="gift-name">ᴘᴀᴜs ᴍᴇɴʏᴇʟᴀᴍ</span>
+              <span class="badge-emoji">🫧</span>
+            </div>
+            <div class="gift-action special">SETRIKAA</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Panah Bawah (Klik untuk geser manual ke bawah) -->
+    <div class="scroll-indicator" onclick="nextRow()" title="Klik untuk menggulir">
+      <svg viewBox="0 0 24 24">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    const giftList = document.getElementById('giftList');
+    const viewport = document.getElementById('viewport');
+    const items = document.querySelectorAll('.gift-item');
+    const visibleRows = 2; // Menampilkan 2 baris sekaligus
+    const itemHeight = 68; // Tinggi per baris
+    let currentIndex = 0;
+    let timer;
+
+    function updateScroll() {
+      giftList.style.transform = `translateY(-${currentIndex * itemHeight}px)`;
+    }
+
+    function nextRow() {
+      const maxIndex = items.length - visibleRows;
+      if (maxIndex <= 0) return;
+
+      currentIndex++;
+      if (currentIndex > maxIndex) {
+        currentIndex = 0;
+      }
+      updateScroll();
+      resetTimer();
+    }
+
+    function prevRow() {
+      const maxIndex = items.length - visibleRows;
+      if (maxIndex <= 0) return;
+
+      currentIndex--;
+      if (currentIndex < 0) {
+        currentIndex = maxIndex;
+      }
+      updateScroll();
+      resetTimer();
+    }
+
+    // Gulir pakai roda mouse (Scroll Wheel) di Chrome
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        nextRow();
+      } else {
+        prevRow();
+      }
+    });
+
+    // Otomatis bergulir ke bawah setiap 3.5 detik
+    function resetTimer() {
+      clearInterval(timer);
+      timer = setInterval(nextRow, 3500);
+    }
+
+    resetTimer();
+  </script>
+
+</body>
+</html>
