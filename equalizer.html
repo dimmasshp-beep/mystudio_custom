@@ -20,12 +20,12 @@
     align-items: flex-end;
     justify-content: center;
     gap: 6px;
-    height: 100px;
+    height: 110px;
     padding: 10px;
   }
   .eq-bar {
     width: 14px;
-    height: 8px;
+    height: 10px;
     background-color: #ffffff;
     border-radius: 3px;
     transition: height 0.05s ease-out;
@@ -41,6 +41,7 @@
     const BAR_COUNT = 22;
     const bars = [];
 
+    // Pastikan 22 balok putih langsung muncul di layar
     for (let i = 0; i < BAR_COUNT; i++) {
       const bar = document.createElement('div');
       bar.className = 'eq-bar';
@@ -48,24 +49,35 @@
       bars.push(bar);
     }
 
-    async function startAutoEqualizer() {
+    async function initEqualizer() {
       try {
-        // Otomatis meminta akses saluran audio input sistem tanpa tombol klik
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false
-          },
-          video: false
-        });
+        // Minta izin audio awal untuk membaca daftar perangkat
+        const initialStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
+        // Cari otomatis perangkat VB-Cable atau Stereo Mix jika terpasang
+        const virtualCable = devices.find(d =>
+          d.kind === 'audioinput' &&
+          (d.label.toLowerCase().includes('cable output') || d.label.toLowerCase().includes('stereo mix'))
+        );
+
+        let finalStream = initialStream;
+        if (virtualCable) {
+          initialStream.getTracks().forEach(t => t.stop());
+          finalStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: { exact: virtualCable.deviceId },
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            }
+          });
         }
 
-        const source = audioCtx.createMediaStreamSource(stream);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+        const source = audioCtx.createMediaStreamSource(finalStream);
         const analyser = audioCtx.createAnalyser();
         analyser.fftSize = 128;
         analyser.smoothingTimeConstant = 0.72;
@@ -73,26 +85,25 @@
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        function renderLoop() {
-          requestAnimationFrame(renderLoop);
+        function animate() {
+          requestAnimationFrame(animate);
           analyser.getByteFrequencyData(dataArray);
 
           for (let i = 0; i < BAR_COUNT; i++) {
             const freqIndex = Math.floor((i / BAR_COUNT) * (dataArray.length * 0.65));
             const value = dataArray[freqIndex] || 0;
-            const heightPx = Math.max(8, Math.round((value / 255) * 90));
+            const heightPx = Math.max(10, Math.round((value / 255) * 95));
             bars[i].style.height = heightPx + 'px';
           }
         }
-        renderLoop();
+        animate();
 
       } catch (err) {
-        console.error("Menunggu akses audio sistem:", err);
+        console.warn("Izin audio belum aktif:", err);
       }
     }
 
-    // Jalankan otomatis begitu halaman terbuka
-    window.addEventListener('load', startAutoEqualizer);
+    window.addEventListener('load', initEqualizer);
   </script>
 </body>
 </html>
