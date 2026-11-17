@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Right Edge Notch All-in-1</title>
+  <style>
+    @import url('https://googleapis.com');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { display: flex; align-items: center; justify-content: flex-end; background: transparent; font-family: 'Montserrat', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+
+    .wrap { position: relative; display: inline-flex; padding: 2.5px 0 2.5px 2.5px; border-radius: 28px 0 0 28px; overflow: hidden; background: rgba(255,255,255,.08); box-shadow: -8px 0 28px rgba(0,0,0,.8), -4px 0 20px rgba(56,242,255,.25); transition: all .45s cubic-bezier(.34,1.56,.64,1); }
+    .wrap::before { content: ""; position: absolute; right: -220px; top: 50%; width: 650px; height: 650px; margin-top: -325px; background: conic-gradient(from 0deg, transparent 210deg, #0284c7 270deg, #38f2ff 330deg, #fff 355deg, transparent 360deg); animation: spin 3s linear infinite; }
+    .wrap.alert::before { background: conic-gradient(from 0deg, transparent 210deg, #f59e0b 270deg, #ffd782 330deg, #fff 355deg, transparent 360deg); }
+
+    .notch { position: relative; z-index: 1; display: flex; align-items: center; background: #0d0e12; border-radius: 26px 0 0 26px; padding: 14px 14px 14px 20px; color: #fff; min-height: 76px; max-width: 380px; }
+    .live { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; min-width: 76px; text-align: right; }
+    .wrap.open .live { display: none; }
+    .badge { display: flex; align-items: center; gap: 6px; color: #ff1e56; font-size: 11.5px; font-weight: 900; letter-spacing: 1px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff1e56; box-shadow: 0 0 10px #ff1e56; animation: pulse 1.5s infinite; }
+    .dot.ok { box-shadow: 0 0 10px #ff1e56, 0 0 0 2.5px rgba(34,197,94,.85); }
+    .line { width: 100%; height: 1px; background: rgba(255,255,255,.14); }
+    .stat span { display: block; color: #8c8f99; font-size: 8.5px; font-weight: 800; }
+    .stat b { font-size: 16px; font-weight: 800; line-height: 1.1; }
+
+    .card { display: none; align-items: center; gap: 12px; min-width: 245px; overflow: hidden; animation: slide .35s ease; }
+    .wrap.open .card { display: flex; }
+    .pic { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #38f2ff; object-fit: cover; flex-shrink: 0; }
+    .wrap.alert .pic { border-color: #ffd782; }
+    .pic.spin { animation: spin 6s linear infinite; }
+    .info { overflow: hidden; }
+    .tag { display: block; font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #38f2ff; text-transform: uppercase; }
+    .wrap.alert .tag { color: #ffd782; }
+    #title { display: block; font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #desc { display: block; font-size: 11px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { transform: scale(.95); opacity: .85; } 50% { transform: scale(1.15); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <div class="notch">
+      <div class="live">
+        <div class="badge"><i class="dot" id="dot"></i>LIVE</div>
+        <div class="line"></div>
+        <div class="stat"><span>VIEWERS</span><b id="v">0</b></div>
+        <div class="stat"><span>TOTAL</span><b id="t">0</b></div>
+      </div>
+      <div class="card">
+        <img class="pic" id="pic" src="" alt="">
+        <div class="info"><span class="tag" id="tag"></span><b id="title"></b><span id="desc"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === EDIT SUARA TTS & IP PC ===
+    const SUARA = { aktif: true, gender: 'pria', nada: 0.78, cepat: 0.96, vol: 1.0, chat: true, join: false };
+    const MANUAL_PC_IP = '';
+
+    const wrap = document.getElementById('wrap'), dot = document.getElementById('dot'), pic = document.getElementById('pic'), q = [];
+    let busy = false, total = 0, lastV = 0, simV = 0, lastLike = 0, slide = 0, song = { t: 'Live Music Session', a: 'cumaniniajaa • Request di Chat', c: '' };
+
+    const speak = teks => {
+      if (!SUARA.aktif || !teks || !('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u = Object.assign(new SpeechSynthesisUtterance(teks), { lang: 'id-ID', pitch: SUARA.nada, rate: SUARA.cepat, volume: SUARA.vol });
+      const v = speechSynthesis.getVoices().filter(x => x.lang.includes('id'));
+      if (v.length) u.voice = v.find(x => SUARA.gender === 'pria' ? /ardi|male|pria/i.test(x.name) : /gadis|female|wanita/i.test(x.name)) || v;
+      speechSynthesis.speak(u);
+    };
+    if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+    const show = (tag, title, desc, img = '', alert = false, spin = false) => {
+      document.getElementById('tag').innerText = tag;
+      document.getElementById('title').innerText = title;
+      document.getElementById('desc').innerText = desc;
+      pic.src = img || `https://dicebear.com{encodeURIComponent(title)}`;
+      pic.classList.toggle('spin', spin);
+      wrap.className = alert ? 'wrap open alert' : 'wrap open';
+    };
+
+    setInterval(() => {
+      if (busy || q.length) return;
+      slide = (slide + 1) % 3;
+      if (slide === 0) wrap.className = 'wrap';
+      else if (slide === 1) show('🎵 NOW PLAYING', song.t, song.a, song.c, false, true);
+      else show('✨ LIVE STREAM', 'Support Doa & Follow', 'Tap-tap layar & kirim gift terbaikmu!', 'https://dicebear.com');
+    }, 5000);
+
+    const next = () => {
+      if (busy || !q.length) return;
+      busy = true;
+      const d = q.shift();
+      show(d.tag, d.t, d.d, d.img, true, d.spin);
+      if (d.tts) speak(d.tts);
+      setTimeout(() => { busy = false; q.length ? next() : (slide = 0, wrap.className = 'wrap'); }, 4200);
+    };
+    const push = (tag, t, d, img = '', tts = '', spin = false) => { q.push({ tag, t, d, img, tts, spin }); next(); };
+
+    const stat = (cur, add = false) => {
+      if (typeof cur === 'number') {
+        document.getElementById('v').innerText = cur.toLocaleString('id-ID');
+        if (cur > lastV) { total += (cur - lastV); document.getElementById('t').innerText = total.toLocaleString('id-ID'); }
+        lastV = cur;
+      } else if (add) {
+        document.getElementById('v').innerText = (++simV).toLocaleString('id-ID');
+        document.getElementById('t').innerText = (++total).toLocaleString('id-ID');
+      }
+    };
+
+    const onEvent = raw => {
+      try {
+        const m = typeof raw === 'string' ? JSON.parse(raw) : raw, d = m.data || m;
+        const tipe = (m.event || m.type || d.type || '').toLowerCase();
+        const nama = d.nickname || d.uniqueId || d.user || d.author || 'Penonton';
+        const foto = d.profilePictureUrl || d.avatar || '';
+        const cur = d.viewerCount ?? d.viewers ?? d.roomInfo?.viewerCount;
+        if (typeof cur === 'number') stat(cur);
+
+        if (/song|music|nowplaying/.test(tipe)) {
+          song = { t: d.title || d.song || 'Musik Diputar', a: d.artist || 'Pemutar Musik PC', c: d.cover || foto };
+          push('🎵 GANTI LAGU', song.t, song.a, song.c, '', true);
+        } else if (/follow|social/.test(tipe)) {
+          stat(null, true); push('➕ NEW FOLLOWER', nama, 'Terima kasih sudah follow!', foto, `Terima kasih ${nama}, sudah follow.`);
+        } else if (tipe === 'gift' && !(d.giftType === 1 && !d.repeatEnd)) {
+          stat(null, true);
+          const jml = (d.repeatCount || d.count || 1) > 1 ? ` x${d.repeatCount || d.count}` : '';
+          push('🎁 NEW GIFT', nama, `Kirim ${d.giftName || 'Gift'}${jml}!`, foto, `Terima kasih ${nama}, sudah kirim ${d.giftName || 'Gift'}.`);
+        } else if (tipe === 'like') {
+          stat(null, true);
+          if (Date.now() - lastLike > 6000) { lastLike = Date.now(); push('❤️ TAP-TAP LAYAR', nama, 'Memberikan like!', foto); }
+        } else if (/member|join/.test(tipe)) {
+          document.getElementById('t').innerText = (++total).toLocaleString('id-ID');
+          push('👋 SELAMAT DATANG', nama, 'Bergabung ke live!', foto, SUARA.join ? `Selamat datang ${nama}` : '');
+        } else if (/chat|comment/.test(tipe) && d.comment) {
+          const teks = d.comment.replace(/[^\p{L}\p{N}\s.,?!]/gu, '').trim();
+          if (teks) push('💬 CHAT & TTS', nama, teks, foto, SUARA.chat ? `${nama} bilang, ${teks}` : '');
+        }
+      } catch (e) {}
+    };
+
+    const ip = new URLSearchParams(location.search).get('ip') || MANUAL_PC_IP || location.hostname || '127.0.0.1';
+    [`ws://${ip}:21213/`, `ws://${ip}:8080`].forEach(u => {
+      const go = () => {
+        const ws = new WebSocket(u);
+        ws.onopen = () => dot.classList.add('ok');
+        ws.onmessage = e => onEvent(e.data);
+        ws.onclose = () => { dot.classList.remove('ok'); setTimeout(go, 3000); };
+        ws.onerror = () => ws.close();
+      };
+      go();
+    });
+  </script>
+</body>
+</html>
