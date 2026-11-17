@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NowPlaying Chrome Equalizer Widget</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  #connectBtn {
+    position: absolute;
+    background: #fe2c55;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(254, 44, 85, 0.45);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    z-index: 10;
+  }
+  #connectBtn:hover {
+    transform: scale(1.05);
+  }
+  canvas {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+  }
+</style>
+</head>
+<body>
+
+  <button id="connectBtn">Hubungkan NowPlaying Chrome</button>
+  <canvas id="eqCanvas" width="520" height="120"></canvas>
+
+  <script>
+    const connectBtn = document.getElementById('connectBtn');
+    const canvas = document.getElementById('eqCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Konfigurasi Tampilan Balok Equalizer
+    const CONFIG = {
+      barCount: 22,
+      maxBlocks: 12,
+      blockWidth: 18,
+      blockHeight: 5,
+      gapX: 5,
+      gapY: 3
+    };
+
+    let audioCtx = null;
+    let analyser = null;
+    let animId = null;
+
+    // Menggambar baris dasar saat audio belum terhubung
+    function drawIdleState() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const totalWidth = CONFIG.barCount * (CONFIG.blockWidth + CONFIG.gapX) - CONFIG.gapX;
+      const startX = (canvas.width - totalWidth) / 2;
+      const baseY = canvas.height - 15;
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      for (let i = 0; i < CONFIG.barCount; i++) {
+        const x = startX + i * (CONFIG.blockWidth + CONFIG.gapX);
+        ctx.fillRect(x, baseY, CONFIG.blockWidth, CONFIG.blockHeight);
+      }
+    }
+
+    // NowPlaying Audio Bridge Core
+    async function initNowPlayingBridge() {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length === 0) {
+          alert("Centang 'Bagikan juga audio tab' (Share tab audio) atau 'Share system audio' agar equalizer bergerak.");
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        // Sembunyikan tombol setelah terhubung
+        connectBtn.style.display = 'none';
+
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.78;
+        source.connect(analyser);
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function renderEqualizer() {
+          animId = requestAnimationFrame(renderEqualizer);
+          analyser.getByteFrequencyData(dataArray);
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const totalWidth = CONFIG.barCount * (CONFIG.blockWidth + CONFIG.gapX) - CONFIG.gapX;
+          const startX = (canvas.width - totalWidth) / 2;
+          const baseY = canvas.height - 15;
+
+          for (let i = 0; i < CONFIG.barCount; i++) {
+            const freqIndex = Math.floor((i / CONFIG.barCount) * (bufferLength * 0.65));
+            const value = dataArray[freqIndex] || 0;
+            const activeBlocks = Math.max(1, Math.round((value / 255) * CONFIG.maxBlocks));
+            const x = startX + i * (CONFIG.blockWidth + CONFIG.gapX);
+
+            for (let b = 0; b < activeBlocks; b++) {
+              const y = baseY - b * (CONFIG.blockHeight + CONFIG.gapY);
+              ctx.fillStyle = (b === activeBlocks - 1 && activeBlocks > 2)
+                ? "rgba(255, 255, 255, 0.75)"
+                : "rgba(255, 255, 255, 0.95)";
+              ctx.fillRect(x, y, CONFIG.blockWidth, CONFIG.blockHeight);
+            }
+          }
+        }
+
+        renderEqualizer();
+
+        // Reset jika sesi berbagi audio dihentikan
+        audioTracks.onended = () => {
+          cancelAnimationFrame(animId);
+          if (audioCtx) audioCtx.close();
+          connectBtn.style.display = 'block';
+          drawIdleState();
+        };
+
+      } catch (err) {
+        console.error("Koneksi audio dibatalkan:", err);
+      }
+    }
+
+    drawIdleState();
+    connectBtn.addEventListener('click', initNowPlayingBridge);
+  </script>
+</body>
+</html>
