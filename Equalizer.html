@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok LIVE Equalizer</title>
-<script src="https://jsdelivr.net"></script>
+<title>Auto Equalizer Widget</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -13,179 +12,87 @@
     background: transparent;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  #senderBox {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    background: #181818;
-    border: 1px solid #333;
-    padding: 20px 28px;
-    border-radius: 16px;
-    color: #fff;
-    text-align: center;
-    margin-bottom: 16px;
+  #eqContainer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    height: 100px;
+    padding: 10px;
   }
-  #connectBtn {
-    background: #fe2c55;
-    color: #fff;
-    border: none;
-    padding: 12px 26px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  #statusMsg { font-size: 12px; color: #bbb; max-width: 300px; line-height: 1.4; }
-  canvas {
-    width: 100%;
-    max-width: 520px;
-    height: 120px;
-    object-fit: contain;
+  .eq-bar {
+    width: 14px;
+    height: 8px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: height 0.05s ease-out;
   }
 </style>
 </head>
 <body>
 
-  <div id="senderBox">
-    <button id="connectBtn" type="button">Hubungkan Audio Chrome</button>
-    <p id="statusMsg">Menyiapkan jembatan koneksi...</p>
-  </div>
-
-  <canvas id="eqCanvas" width="520" height="120"></canvas>
+  <div id="eqContainer"></div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const isWidget = params.get('view') === 'widget';
-    const PEER_ID = "dimmasshp-live-eq-998877";
+    const eqContainer = document.getElementById('eqContainer');
+    const BAR_COUNT = 22;
+    const bars = [];
 
-    const senderBox = document.getElementById('senderBox');
-    const connectBtn = document.getElementById('connectBtn');
-    const statusMsg = document.getElementById('statusMsg');
-    const canvas = document.getElementById('eqCanvas');
-    const ctx = canvas.getContext('2d');
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'eq-bar';
+      eqContainer.appendChild(bar);
+      bars.push(bar);
+    }
 
-    const CONFIG = { barCount: 22, maxBlocks: 12, blockWidth: 18, blockHeight: 6, gapX: 5, gapY: 3 };
-    let currentFreq = new Array(64).fill(0);
-    let lastUpdate = 0;
+    async function startAutoEqualizer() {
+      try {
+        // Otomatis meminta akses saluran audio input sistem tanpa tombol klik
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          },
+          video: false
+        });
 
-    function drawEqualizer(freqArray) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const totalWidth = CONFIG.barCount * (CONFIG.blockWidth + CONFIG.gapX) - CONFIG.gapX;
-      const startX = (canvas.width - totalWidth) / 2;
-      const baseY = canvas.height - 22;
-
-      for (let i = 0; i < CONFIG.barCount; i++) {
-        const freqIndex = Math.floor((i / CONFIG.barCount) * (freqArray.length * 0.65));
-        const value = freqArray[freqIndex] || 0;
-        const activeBlocks = Math.max(1, Math.round((value / 255) * CONFIG.maxBlocks));
-        const x = startX + i * (CONFIG.blockWidth + CONFIG.gapX);
-
-        for (let b = 0; b < activeBlocks; b++) {
-          const y = baseY - b * (CONFIG.blockHeight + CONFIG.gapY);
-          ctx.fillStyle = "#FFFFFF";
-          ctx.fillRect(x, y, CONFIG.blockWidth, CONFIG.blockHeight);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
         }
+
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.72;
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        function renderLoop() {
+          requestAnimationFrame(renderLoop);
+          analyser.getByteFrequencyData(dataArray);
+
+          for (let i = 0; i < BAR_COUNT; i++) {
+            const freqIndex = Math.floor((i / BAR_COUNT) * (dataArray.length * 0.65));
+            const value = dataArray[freqIndex] || 0;
+            const heightPx = Math.max(8, Math.round((value / 255) * 90));
+            bars[i].style.height = heightPx + 'px';
+          }
+        }
+        renderLoop();
+
+      } catch (err) {
+        console.error("Menunggu akses audio sistem:", err);
       }
     }
 
-    if (isWidget) {
-      senderBox.remove();
-      drawEqualizer(currentFreq);
-
-      const peer = new Peer(PEER_ID);
-      peer.on('connection', (conn) => {
-        conn.on('data', (payload) => {
-          if (payload && payload.freq) {
-            currentFreq = payload.freq;
-            lastUpdate = Date.now();
-          }
-        });
-      });
-
-      function renderWidget() {
-        requestAnimationFrame(renderWidget);
-        if (Date.now() - lastUpdate > 250) {
-          currentFreq = currentFreq.map(v => Math.max(0, v - 18));
-        }
-        drawEqualizer(currentFreq);
-      }
-      renderWidget();
-    } else {
-      senderBox.style.display = 'flex';
-      document.body.style.background = '#111111';
-      drawEqualizer(currentFreq);
-
-      const peer = new Peer();
-      let conn = null;
-
-      function linkToLiveStudio() {
-        conn = peer.connect(PEER_ID, { reliable: false });
-        conn.on('open', () => {
-          statusMsg.innerHTML = "Terhubung ke <b>TikTok LIVE Studio</b>! Klik tombol merah di atas untuk menangkap suara.";
-        });
-      }
-
-      peer.on('open', () => {
-        statusMsg.innerHTML = "Siap! Klik tombol merah di atas, lalu pilih tab <b>TikTok</b> + centang <b>Bagikan audio</b>.";
-        linkToLiveStudio();
-      });
-
-      connectBtn.addEventListener('click', async () => {
-        try {
-          const stream = await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-          });
-
-          const audioTracks = stream.getAudioTracks();
-          if (audioTracks.length === 0) {
-            alert("Centang 'Bagikan juga audio tab' atau 'Audio sistem' saat memilih layar!");
-            stream.getTracks().forEach(t => t.stop());
-            return;
-          }
-
-          if (!conn || !conn.open) linkToLiveStudio();
-
-          connectBtn.textContent = "Aktif & Mengirim Suara";
-          connectBtn.style.background = "#00c853";
-          statusMsg.innerHTML = "Equalizer di <b>TikTok LIVE Studio</b> sekarang mengikuti suara Chrome.";
-
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          if (audioCtx.state === 'suspended') await audioCtx.resume();
-
-          const source = audioCtx.createMediaStreamSource(stream);
-          const analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 128;
-          analyser.smoothingTimeConstant = 0.78;
-          source.connect(analyser);
-
-          const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-          function sendLoop() {
-            requestAnimationFrame(sendLoop);
-            analyser.getByteFrequencyData(dataArray);
-            const list = Array.from(dataArray);
-            drawEqualizer(list);
-            if (conn && conn.open) conn.send({ freq: list });
-          }
-          sendLoop();
-
-          audioTracks.onended = () => {
-            connectBtn.textContent = "Hubungkan Audio Chrome";
-            connectBtn.style.background = "#fe2c55";
-            statusMsg.textContent = "Koneksi dihentikan. Klik tombol di atas untuk menghubungkan ulang.";
-          };
-        } catch (err) {
-          statusMsg.textContent = "Dibatalkan: " + err.message;
-        }
-      });
-    }
+    // Jalankan otomatis begitu halaman terbuka
+    window.addEventListener('load', startAutoEqualizer);
   </script>
 </body>
 </html>
