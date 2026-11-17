@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>7 Gift & Tantangan Overlay - Anti Bocor Chroma Key</title>
+  <title>7 Gift & Tantangan Overlay - Final Transparent</title>
   <link href="https://googleapis.com" rel="stylesheet">
   <style>
     * {
@@ -13,9 +13,8 @@
       user-select: none;
     }
 
-    /* Layar Hijau Solid untuk Chroma Key */
     body {
-      background-color: #00ff00;
+      background-color: transparent; /* Transparan asli tanpa layar hijau/magenta */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,13 +22,12 @@
       overflow: hidden;
     }
 
-    /* Kotak Utama Abu-Abu Solid (Tidak Tembus Hijau agar tidak terhapus Chroma Key) */
     .gift-container {
       width: 440px;
-      background-color: #2b2d31; /* Abu-abu solid anti-tembus hijau */
+      background-color: rgba(43, 45, 49, 0.78); /* Abu-abu transparan langsung */
       border-radius: 18px;
       padding: 14px 18px 10px 18px;
-      border: 2px solid #4e5058;
+      border: 2px solid rgba(255, 255, 255, 0.18);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -68,7 +66,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #383a40;
+      background-color: rgba(56, 58, 64, 0.85);
       border-radius: 12px;
     }
 
@@ -86,10 +84,10 @@
       font-size: 13px;
       font-weight: 800;
       color: #ffffff;
-      background-color: #1e1f22;
+      background-color: rgba(30, 31, 34, 0.9);
       padding: 1px 6px;
       border-radius: 6px;
-      border: 1px solid #5c5f66;
+      border: 1px solid rgba(255, 255, 255, 0.25);
       line-height: 1.2;
     }
 
@@ -114,7 +112,7 @@
       font-weight: 700;
       font-size: 14px;
       letter-spacing: 0.8px;
-      color: #b5bac1;
+      color: #d1d5db;
       white-space: nowrap;
     }
 
@@ -131,25 +129,26 @@
       letter-spacing: -0.2px;
       line-height: 1.2;
       color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
       white-space: nowrap;
     }
 
     /* Aksen Warna untuk Tantangan Spesial */
     .gift-action.danger {
-      color: #ff7b7b;
+      color: #ff8787;
     }
 
     .gift-action.special {
-      color: #7ee787;
+      color: #69db7c;
     }
 
-    /* Tombol Panah Bawah Tebal & Solid agar Tidak Hilang saat Chroma Key */
+    /* Tombol Panah Bawah */
     .scroll-indicator {
       margin-top: 6px;
       padding: 4px 18px;
-      background-color: #383a40;
+      background-color: rgba(56, 58, 64, 0.85);
       border-radius: 99px;
-      border: 1px solid #5c5f66;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
       animation: bounce 1.8s infinite;
       display: flex;
@@ -287,7 +286,7 @@
       </div>
     </div>
 
-    <!-- Panah Bawah (Klik untuk geser manual ke bawah) -->
+    <!-- Panah Bawah -->
     <div class="scroll-indicator" onclick="nextRow()" title="Klik untuk menggulir">
       <svg viewBox="0 0 24 24">
         <polyline points="6 9 12 15 18 9"></polyline>
