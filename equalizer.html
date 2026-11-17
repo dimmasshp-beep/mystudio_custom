@@ -3,13 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Equalizer Widget</title>
+<title>Transparent Equalizer Widget</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
   html, body {
     width: 100%;
     height: 100%;
-    background: transparent;
+    background-color: rgba(0, 0, 0, 0) !important;
+    background: transparent !important;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -22,6 +27,7 @@
     gap: 6px;
     height: 110px;
     padding: 10px;
+    background: transparent !important;
   }
   .eq-bar {
     width: 14px;
@@ -41,7 +47,6 @@
     const BAR_COUNT = 22;
     const bars = [];
 
-    // Pastikan 22 balok putih langsung muncul di layar
     for (let i = 0; i < BAR_COUNT; i++) {
       const bar = document.createElement('div');
       bar.className = 'eq-bar';
@@ -49,24 +54,22 @@
       bars.push(bar);
     }
 
-    async function initEqualizer() {
+    async function startTransparentEqualizer() {
       try {
-        // Minta izin audio awal untuk membaca daftar perangkat
         const initialStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const devices = await navigator.mediaDevices.enumerateDevices();
 
-        // Cari otomatis perangkat VB-Cable atau Stereo Mix jika terpasang
-        const virtualCable = devices.find(d =>
+        const virtualDevice = devices.find(d =>
           d.kind === 'audioinput' &&
           (d.label.toLowerCase().includes('cable output') || d.label.toLowerCase().includes('stereo mix'))
         );
 
-        let finalStream = initialStream;
-        if (virtualCable) {
+        let streamToUse = initialStream;
+        if (virtualDevice) {
           initialStream.getTracks().forEach(t => t.stop());
-          finalStream = await navigator.mediaDevices.getUserMedia({
+          streamToUse = await navigator.mediaDevices.getUserMedia({
             audio: {
-              deviceId: { exact: virtualCable.deviceId },
+              deviceId: { exact: virtualDevice.deviceId },
               echoCancellation: false,
               noiseSuppression: false,
               autoGainControl: false
@@ -75,9 +78,11 @@
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
 
-        const source = audioCtx.createMediaStreamSource(finalStream);
+        const source = audioCtx.createMediaStreamSource(streamToUse);
         const analyser = audioCtx.createAnalyser();
         analyser.fftSize = 128;
         analyser.smoothingTimeConstant = 0.72;
@@ -85,8 +90,8 @@
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        function animate() {
-          requestAnimationFrame(animate);
+        function render() {
+          requestAnimationFrame(render);
           analyser.getByteFrequencyData(dataArray);
 
           for (let i = 0; i < BAR_COUNT; i++) {
@@ -96,14 +101,14 @@
             bars[i].style.height = heightPx + 'px';
           }
         }
-        animate();
+        render();
 
       } catch (err) {
-        console.warn("Izin audio belum aktif:", err);
+        console.warn("Menunggu akses audio:", err);
       }
     }
 
-    window.addEventListener('load', initEqualizer);
+    window.addEventListener('load', startTransparentEqualizer);
   </script>
 </body>
 </html>
