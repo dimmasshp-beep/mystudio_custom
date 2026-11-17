@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>7 Gift & Tantangan Overlay - TikTok Live Studio</title>
-  <!-- Import Font Tebal yang Bersih dan Modern -->
+  <title>7 Gift & Tantangan Overlay - Anti Bocor Chroma Key</title>
   <link href="https://googleapis.com" rel="stylesheet">
   <style>
     * {
@@ -14,7 +13,7 @@
       user-select: none;
     }
 
-    /* Layar Hijau untuk Chroma Key di TikTok Live Studio */
+    /* Layar Hijau Solid untuk Chroma Key */
     body {
       background-color: #00ff00;
       display: flex;
@@ -24,13 +23,13 @@
       overflow: hidden;
     }
 
-    /* Kotak Utama Abu-Abu Transparan */
+    /* Kotak Utama Abu-Abu Solid (Tidak Tembus Hijau agar tidak terhapus Chroma Key) */
     .gift-container {
       width: 440px;
-      background: rgba(55, 58, 64, 0.72);
+      background-color: #2b2d31; /* Abu-abu solid anti-tembus hijau */
       border-radius: 18px;
-      padding: 12px 18px 8px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 14px 18px 10px 18px;
+      border: 2px solid #4e5058;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -51,7 +50,7 @@
       transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    /* Desain Per Baris (Stiker Gift + Nama Gift + Keterangan Aksi) */
+    /* Desain Per Baris */
     .gift-item {
       height: 68px;
       display: flex;
@@ -69,30 +68,32 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: #383a40;
+      border-radius: 12px;
     }
 
     .gift-emoji {
-      font-size: 38px;
+      font-size: 36px;
       line-height: 1;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
     }
 
     /* Angka Jumlah Gift (1) di Pojok Stiker */
     .gift-count {
       position: absolute;
-      bottom: -2px;
-      right: -2px;
+      bottom: -3px;
+      right: -3px;
       font-family: 'Poppins', sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       color: #ffffff;
-      background: rgba(0, 0, 0, 0.65);
-      padding: 0 5px;
+      background-color: #1e1f22;
+      padding: 1px 6px;
       border-radius: 6px;
-      line-height: 1.3;
+      border: 1px solid #5c5f66;
+      line-height: 1.2;
     }
 
-    /* Kolom Teks (Baris Atas: Nama Gift, Baris Bawah: Tantangan) */
+    /* Kolom Teks */
     .gift-info {
       display: flex;
       flex-direction: column;
@@ -107,14 +108,13 @@
       gap: 6px;
     }
 
-    /* Nama Gift Small Caps (Bersih tanpa outline kuning) */
+    /* Nama Gift Small Caps */
     .gift-name {
       font-family: 'Montserrat', 'Poppins', sans-serif;
       font-weight: 700;
       font-size: 14px;
       letter-spacing: 0.8px;
-      color: #d1d5db;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      color: #b5bac1;
       white-space: nowrap;
     }
 
@@ -123,7 +123,7 @@
       line-height: 1;
     }
 
-    /* Teks Tantangan Utama (Bersih, Putih Cerah, Enak Dilihat) */
+    /* Teks Tantangan Utama */
     .gift-action {
       font-family: 'Poppins', sans-serif;
       font-weight: 800;
@@ -131,24 +131,26 @@
       letter-spacing: -0.2px;
       line-height: 1.2;
       color: #ffffff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
       white-space: nowrap;
     }
 
-    /* Aksen Warna Lembut untuk Tantangan Spesial */
+    /* Aksen Warna untuk Tantangan Spesial */
     .gift-action.danger {
-      color: #ff8787;
+      color: #ff7b7b;
     }
 
     .gift-action.special {
-      color: #69db7c;
+      color: #7ee787;
     }
 
-    /* Panah Bawah untuk Gulir Manual */
+    /* Tombol Panah Bawah Tebal & Solid agar Tidak Hilang saat Chroma Key */
     .scroll-indicator {
-      margin-top: 4px;
+      margin-top: 6px;
+      padding: 4px 18px;
+      background-color: #383a40;
+      border-radius: 99px;
+      border: 1px solid #5c5f66;
       cursor: pointer;
-      opacity: 0.75;
       animation: bounce 1.8s infinite;
       display: flex;
       justify-content: center;
@@ -158,8 +160,8 @@
     .scroll-indicator svg {
       width: 20px;
       height: 20px;
-      stroke: #e5e7eb;
-      stroke-width: 2.5;
+      stroke: #ffffff;
+      stroke-width: 3;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -297,8 +299,8 @@
     const giftList = document.getElementById('giftList');
     const viewport = document.getElementById('viewport');
     const items = document.querySelectorAll('.gift-item');
-    const visibleRows = 2; // Menampilkan 2 baris sekaligus
-    const itemHeight = 68; // Tinggi per baris
+    const visibleRows = 2;
+    const itemHeight = 68;
     let currentIndex = 0;
     let timer;
 
@@ -330,7 +332,6 @@
       resetTimer();
     }
 
-    // Gulir pakai roda mouse (Scroll Wheel) di Chrome
     viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
       if (e.deltaY > 0) {
@@ -340,7 +341,6 @@
       }
     });
 
-    // Otomatis bergulir ke bawah setiap 3.5 detik
     function resetTimer() {
       clearInterval(timer);
       timer = setInterval(nextRow, 3500);
