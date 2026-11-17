@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    background: transparent;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    margin: 0;
+    padding: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  .gift-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 260px;
+  }
+  .gift-item {
+    background: rgba(0, 0, 0, 0.6);
+    border-left: 4px solid #ff0050;
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: transform 0.2s ease;
+  }
+  .gift-item.pop {
+    transform: scale(1.06);
+    border-left-color: #00f2fe;
+  }
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .count {
+    color: #00f2fe;
+    font-size: 22px;
+  }
+  .gift-name {
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #ffd700;
+    margin-top: 2px;
+  }
+  .challenge {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="gift-container">
+  <!-- Tombol Keyboard: 1 -->
+  <div class="gift-item" id="box-rose">
+    <div class="top-row">🌹 <span class="count" id="count-rose">0</span></div>
+    <div class="gift-name">ᴍᴀᴡᴀʀ 🧣</div>
+    <div class="challenge">Salah 1 warna</div>
+  </div>
+
+  <!-- Tombol Keyboard: 2 -->
+  <div class="gift-item" id="box-doughnut">
+    <div class="top-row">🍩 <span class="count" id="count-doughnut">0</span></div>
+    <div class="gift-name">ᴅᴏɴᴀᴛ 🥨</div>
+    <div class="challenge">Putar 90°</div>
+  </div>
+
+  <!-- Tombol Keyboard: 3 -->
+  <div class="gift-item" id="box-star">
+    <div class="top-row">✨ <span class="count" id="count-star">0</span></div>
+    <div class="gift-name">ᴄᴀʜᴀʏᴀ ʙɪɴᴛᴀɴɢ 💫</div>
+    <div class="challenge">Tanpa pinset 30d</div>
+  </div>
+
+  <!-- Tombol Keyboard: 4 -->
+  <div class="gift-item" id="box-bravo">
+    <div class="top-row">👏 <span class="count" id="count-bravo">0</span></div>
+    <div class="gift-name">ʙʀᴀᴠᴏ 🏵</div>
+    <div class="challenge">Senggol papan</div>
+  </div>
+
+  <!-- Tombol Keyboard: 5 -->
+  <div class="gift-item" id="box-loveyou">
+    <div class="top-row">🤟 <span class="count" id="count-loveyou">0</span></div>
+    <div class="gift-name">ᴀᴋᴜ ᴄɪɴᴛᴀ ᴋᴀᴍᴜ 💝</div>
+    <div class="challenge">Rusak 1 bagian</div>
+  </div>
+
+  <!-- Tombol Keyboard: 6 -->
+  <div class="gift-item" id="box-perfume">
+    <div class="top-row">🧴 <span class="count" id="count-perfume">0</span></div>
+    <div class="gift-name">ᴘᴀʀғᴜᴍ 🦢</div>
+    <div class="challenge">BALIK PAPAN!</div>
+  </div>
+
+  <!-- Tombol Keyboard: 7 -->
+  <div class="gift-item" id="box-whale">
+    <div class="top-row">🐳 <span class="count" id="count-whale">0</span></div>
+    <div class="gift-name">ᴘᴀᴜs ᴍᴇɴʏᴇʟᴀᴍ 🫧</div>
+    <div class="challenge">SETRIKAA</div>
+  </div>
+</div>
+
+<script>
+  const counters = {
+    rose: 0, doughnut: 0, star: 0, bravo: 0, loveyou: 0, perfume: 0, whale: 0
+  };
+
+  function addGift(key, amount = 1) {
+    if (counters.hasOwnProperty(key)) {
+      counters[key] += amount;
+      document.getElementById(`count-${key}`).innerText = counters[key];
+      const box = document.getElementById(`box-${key}`);
+      box.classList.add('pop');
+      setTimeout(() => box.classList.remove('pop'), 300);
+    }
+  }
+
+  function resetAll() {
+    for (let key in counters) {
+      counters[key] = 0;
+      document.getElementById(`count-${key}`).innerText = 0;
+    }
+  }
+
+  // Kontrol Keyboard Fisik (1-7 untuk tambah, 0 atau R untuk reset)
+  document.addEventListener('keydown', (e) => {
+    const giftOrder = ['rose', 'doughnut', 'star', 'bravo', 'loveyou', 'perfume', 'whale'];
+    const num = parseInt(e.key);
+
+    if (num >= 1 && num <= 7) {
+      addGift(giftOrder[num - 1], 1);
+    } else if (e.key === '0' || e.key.toLowerCase() === 'r') {
+      resetAll();
+    }
+  });
+
+  // Koneksi Otomatis ke Server Node.js TikTok
+  function connectServer() {
+    const ws = new WebSocket("ws://localhost:8080");
+
+    ws.onmessage = function(event) {
+      const msg = JSON.parse(event.data);
+
+      if (msg.type === 'gift') {
+        const name = (msg.giftName || "").toLowerCase();
+        const qty = msg.count || 1;
+
+        if (name.includes("rose") || name.includes("mawar")) addGift("rose", qty);
+        else if (name.includes("doughnut") || name.includes("donut") || name.includes("donat")) addGift("doughnut", qty);
+        else if (name.includes("star") || name.includes("bintang")) addGift("star", qty);
+        else if (name.includes("bravo")) addGift("bravo", qty);
+        else if (name.includes("love you") || name.includes("cinta kamu")) addGift("loveyou", qty);
+        else if (name.includes("perfume") || name.includes("parfum")) addGift("perfume", qty);
+        else if (name.includes("whale") || name.includes("paus")) addGift("whale", qty);
+      } 
+      else if (msg.type === 'reset') {
+        resetAll();
+      }
+    };
+
+    ws.onclose = function() {
+      setTimeout(connectServer, 3000);
+    };
+  }
+
+  connectServer();
+</script>
+
+</body>
+</html>
