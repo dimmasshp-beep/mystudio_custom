@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nordic Soft Overlay 9:16 (Greenscreen 16:9 Clean)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background-color: #08090c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Kanvas Utama Rasio 9:16 */
+  .canvas-9-16 {
+    position: relative;
+    width: 360px;
+    height: 640px;
+    background-color: #000000; /* Tema Solid Hitam */
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 1);
+  }
+
+  /* Kotak Greenscreen 16:9 Tengah */
+  .greenscreen-16-9 {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    width: 86%;
+    aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+    background-color: #00FF00; /* Hijau Chroma Key Murni */
+    border-radius: 12px;
+    z-index: 2;
+    box-shadow: 0 0 28px rgba(56, 189, 248, 0.2), inset 0 0 12px rgba(0, 0, 0, 0.12);
+    border: 1.5px solid rgba(186, 230, 253, 0.4);
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  #bg-anim { z-index: 1; }
+  #fg-anim { z-index: 3; }
+</style>
+</head>
+<body>
+
+<div class="canvas-9-16">
+  <canvas id="bg-anim" width="720" height="1280"></canvas>
+  <div class="greenscreen-16-9"></div>
+  <canvas id="fg-anim" width="720" height="1280"></canvas>
+</div>
+
+<script>
+  const bgCanvas = document.getElementById('bg-anim');
+  const bgCtx = bgCanvas.getContext('2d');
+  const fgCanvas = document.getElementById('fg-anim');
+  const fgCtx = fgCanvas.getContext('2d');
+
+  let time = 0;
+
+  // Koordinat kotak greenscreen 16:9 pada kanvas internal 720x1280
+  const boxTopY = 491;
+  const boxBottomY = 840;
+
+  // Partikel Salju Halus & Cahaya Nordic
+  const particles = Array.from({ length: 32 }, () => ({
+    x: Math.random() * 720,
+    y: Math.random() * 1280,
+    r: Math.random() * 2.5 + 1,
+    speedY: Math.random() * 0.6 + 0.2,
+    drift: Math.random() * 1.0,
+    phase: Math.random() * Math.PI * 2,
+    isGlow: Math.random() > 0.68
+  }));
+
+  // Ilalang Halus Pulau Nordik di Tepi Bawah Greenscreen
+  const softReeds = Array.from({ length: 26 }, (_, i) => ({
+    x: 68 + i * 22 + (Math.random() * 8 - 4),
+    height: 40 + Math.random() * 60,
+    width: 1.8 + Math.random() * 1.6,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.5 + Math.random() * 0.4
+  }));
+
+  function drawSoftBackground() {
+    bgCtx.clearRect(0, 0, 720, 1280);
+
+    // Aurora Borealis Halus
+    for (let i = 0; i < 2; i++) {
+      bgCtx.save();
+      bgCtx.beginPath();
+      const baseY = i === 0 ? 330 : 960;
+      bgCtx.moveTo(0, baseY);
+
+      for (let x = 0; x <= 720; x += 20) {
+        const wave = Math.sin(x * 0.006 + time * 0.7 + i * 2) * 26
+                   + Math.cos(x * 0.011 - time * 0.5) * 14;
+        bgCtx.lineTo(x, baseY + wave);
+      }
+
+      bgCtx.lineTo(720, i === 0 ? 0 : 1280);
+      bgCtx.lineTo(0, i === 0 ? 0 : 1280);
+      bgCtx.closePath();
+
+      const grad = bgCtx.createLinearGradient(0, baseY - 85, 0, baseY + 85);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      grad.addColorStop(0.5, i === 0 ? 'rgba(94, 234, 212, 0.14)' : 'rgba(125, 211, 252, 0.13)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      bgCtx.fillStyle = grad;
+      bgCtx.fill();
+      bgCtx.restore();
+    }
+
+    // Pendar Cahaya Halus di Sisi Kanan Atas (Zona aman untuk widget overlay eksternal)
+    const notchGlow = bgCtx.createRadialGradient(720, 280, 10, 720, 280, 220);
+    notchGlow.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
+    notchGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    bgCtx.fillStyle = notchGlow;
+    bgCtx.fillRect(450, 80, 270, 400);
+  }
+
+  function drawSoftForeground() {
+    fgCtx.clearRect(0, 0, 720, 1280);
+
+    // 1. Siluet Bukit Pulau Nordik Halus (Menutupi Sudut Bawah Kotak 16:9)
+    fgCtx.save();
+    fgCtx.fillStyle = '#06080b';
+    fgCtx.strokeStyle = 'rgba(186, 230, 253, 0.28)';
+    fgCtx.lineWidth = 1.5;
+
+    // Bukit Kiri Melengkung Halus
+    fgCtx.beginPath();
+    fgCtx.moveTo(0, 1280);
+    fgCtx.lineTo(0, 780);
+    fgCtx.quadraticCurveTo(145, 790, 290, 860);
+    fgCtx.lineTo(340, 1280);
+    fgCtx.closePath();
+    fgCtx.fill();
+    fgCtx.stroke();
+
+    // Bukit Kanan Melengkung Halus
+    fgCtx.beginPath();
+    fgCtx.moveTo(720, 1280);
+    fgCtx.lineTo(720, 790);
+    fgCtx.quadraticCurveTo(575, 800, 430, 865);
+    fgCtx.lineTo(380, 1280);
+    fgCtx.closePath();
+    fgCtx.fill();
+    fgCtx.stroke();
+    fgCtx.restore();
+
+    // 2. Ilalang Lembut Bergoyang Pelan (Sebagian Menutupi Bagian Bawah Layar 16:9)
+    softReeds.forEach(r => {
+      const sway = Math.sin(time * r.speed + r.phase) * 15;
+      const startY = boxBottomY + 25;
+      const tipX = r.x + sway;
+      const tipY = startY - r.height;
+
+      fgCtx.beginPath();
+      fgCtx.moveTo(r.x, startY);
+      fgCtx.quadraticCurveTo(r.x + sway * 0.35, startY - r.height * 0.5, tipX, tipY);
+      fgCtx.strokeStyle = '#05070a';
+      fgCtx.lineWidth = r.width;
+      fgCtx.lineCap = 'round';
+      fgCtx.stroke();
+    });
+
+    // 3. Ranting Nordik Ramping di Sudut Kiri Atas
+    fgCtx.save();
+    const gentleSway = Math.sin(time * 0.6) * 5;
+    fgCtx.strokeStyle = '#06080b';
+    fgCtx.lineWidth = 4;
+    fgCtx.lineCap = 'round';
+    fgCtx.beginPath();
+    fgCtx.moveTo(0, boxTopY - 25);
+    fgCtx.quadraticCurveTo(95, boxTopY + 5, 165 + gentleSway, boxTopY + 40 + gentleSway * 0.4);
+    fgCtx.stroke();
+
+    for (let i = 0; i < 6; i++) {
+      const lx = 55 + i * 20 + gentleSway * (i * 0.15);
+      const ly = (boxTopY - 7) + i * 8 + gentleSway * 0.2;
+      fgCtx.beginPath();
+      fgCtx.ellipse(lx, ly + 8, 3, 8, Math.PI / 5, 0, Math.PI * 2);
+      fgCtx.fillStyle = '#070a0f';
+      fgCtx.fill();
+    }
+    fgCtx.restore();
+
+    // 4. Kabut Tipis Mengalir Lembut di Bagian Bawah Kotak Greenscreen
+    const mistShift = Math.sin(time * 0.4) * 35;
+    const mistGrad = fgCtx.createLinearGradient(0, boxBottomY - 40, 0, boxBottomY + 35);
+    mistGrad.addColorStop(0, 'rgba(186, 230, 253, 0)');
+    mistGrad.addColorStop(0.5, 'rgba(186, 230, 253, 0.12)');
+    mistGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    fgCtx.fillStyle = mistGrad;
+    fgCtx.fillRect(50 + mistShift * 0.2, boxBottomY - 40, 620, 75);
+
+    // 5. Partikel Salju Halus & Cahaya Kunang-Kunang Es
+    particles.forEach(p => {
+      p.y += p.speedY;
+      p.x += Math.sin(time * 0.5 + p.phase) * p.drift;
+      if (p.y > 1290) { p.y = -10; p.x = Math.random() * 720; }
+
+      fgCtx.beginPath();
+      fgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      if (p.isGlow) {
+        fgCtx.fillStyle = 'rgba(186, 230, 253, 0.75)';
+        fgCtx.shadowBlur = 10;
+        fgCtx.shadowColor = '#7dd3fc';
+      } else {
+        fgCtx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        fgCtx.shadowBlur = 3;
+        fgCtx.shadowColor = '#ffffff';
+      }
+      fgCtx.fill();
+      fgCtx.shadowBlur = 0;
+    });
+  }
+
+  function animate() {
+    time += 0.018;
+    drawSoftBackground();
+    drawSoftForeground();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
+</body>
+</html>
