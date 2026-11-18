@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Right Notch Blue Overlay</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:transparent;font-family:sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:8px}
+  .notch{background:rgba(5,10,20,.94);border:1.5px solid #3b82f6;border-right:none;border-radius:18px 0 0 18px;color:#fff;box-shadow:-4px 4px 18px rgba(59,130,246,.45);padding:11px 12px 11px 14px;display:flex;flex-direction:column;gap:8px;min-width:104px;max-width:130px}
+  .live{display:flex;align-items:center;gap:5px;background:rgba(59,130,246,.18);border:1px solid rgba(56,189,248,.4);padding:2px 8px;border-radius:99px;width:fit-content}
+  .dot{width:6px;height:6px;background:#38bdf8;border-radius:50%;box-shadow:0 0 8px #38bdf8;animation:pulse 1.5s infinite}
+  .live-txt{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#60a5fa}
+  .stat{display:flex;flex-direction:column}
+  .lbl{font-size:8.5px;font-weight:700;color:#93c5fd;letter-spacing:.5px}
+  .val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .sep{height:1px;background:rgba(59,130,246,.3);width:100%}
+  .music{display:flex;align-items:center;gap:5px;overflow:hidden;width:100%}
+  .music.hide{display:none}
+  .eq{display:flex;align-items:flex-end;gap:1.5px;height:10px;flex-shrink:0}
+  .eq span{width:2px;background:#38bdf8;border-radius:2px;animation:eq .7s infinite alternate}
+  .eq span:nth-child(2){animation-delay:.2s;height:9px}
+  .eq span:nth-child(3){animation-delay:.4s;height:6px}
+  .marquee{overflow:hidden;white-space:nowrap;width:100%}
+  .song{display:inline-block;font-size:10px;font-weight:600;color:#38bdf8;white-space:nowrap}
+  .song.scroll{animation:scroll 7s linear infinite}
+  .chat{background:rgba(5,10,20,.94);border:1.5px solid #3b82f6;border-right:none;border-radius:99px 0 0 99px;color:#fff;box-shadow:-4px 4px 14px rgba(59,130,246,.4);padding:5px 12px;display:flex;align-items:center;gap:6px;height:28px;max-width:88vw;transform:translateX(105%);opacity:0;transition:all .4s ease}
+  .chat.show{transform:translateX(0);opacity:1}
+  .tag{font-size:8px;font-weight:800;padding:1.5px 5px;border-radius:99px;background:#2563eb;color:#fff;text-transform:uppercase;flex-shrink:0}
+  .tag.yt{background:#ef4444}.tag.tt{background:#ec4899}.tag.kick{background:#22c55e;color:#000}
+  .user{font-size:10.5px;font-weight:700;color:#93c5fd;white-space:nowrap;flex-shrink:0}
+  .msg{font-size:10.5px;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes eq{0%{height:3px}100%{height:10px}}
+  @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+  <div class="notch">
+    <div class="live"><div class="dot"></div><span class="live-txt">LIVE</span></div>
+    <div class="stat"><span class="lbl">VIEWERS</span><span class="val" id="v">0</span></div>
+    <div class="sep"></div>
+    <div class="stat"><span class="lbl">TOTAL</span><span class="val" id="t">0</span></div>
+    <div class="sep" id="m-sep"></div>
+    <div class="music" id="m-box"><div class="eq"><span></span><span></span><span></span></div><div class="marquee"><span class="song" id="song">Now Playing</span></div></div>
+  </div>
+  <div class="chat" id="c-box"><span class="tag" id="c-tag">LIVE</span><span class="user" id="c-user">User:</span><span class="msg" id="c-msg">Halo!</span></div>
+<script>
+  const q=new URLSearchParams(location.search),G=id=>document.getElementById(id);
+  const C={ytId:q.get('yt_id')||"",ytKey:q.get('yt_key')||"",ytChat:q.get('yt_chat_id')||"",api:q.get('api_url')||"",mUrl:q.get('music_url')||"",song:q.get('song')||"",ws:q.get('ws_url')||"",vp:+q.get('viewers')||0,tp:+q.get('total')||0};
+  let st={nv:0,nt:0,yv:0,yt:0,av:0,at:0,wv:0,wt:0},dp={v:0,t:0},ls="",cq=[],seen=new Set(),busy=0;
+
+  function anim(id,s,e){if(s===e)return;let el=G(id),r=e-s,t0=null;const f=t=>{if(!t0)t0=t;let p=Math.min((t-t0)/600,1);el.textContent=Math.round(s+r*(1-Math.pow(1-p,3))).toLocaleString('id-ID');if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+  function upd(){let v=st.nv+st.yv+st.av+st.wv+C.vp,t=Math.max(dp.t,st.nt+st.yt+st.at+st.wt+C.tp,v);anim('v',dp.v,v);anim('t',dp.t,t);dp={v,t}}
+  function setSong(t){let b=G('m-box'),s=G('m-sep'),e=G('song');if(!t){b.classList.add('hide');s.style.display='none';return}b.classList.remove('hide');s.style.display='block';if(t!==ls){ls=t;e.textContent=t;e.classList.toggle('scroll',t.length>12)}}
+  function addChat(p,u,m,id){if(!u||!m)return;let k=id||`${p}-${u}-${m}-${Math.floor(Date.now()/3e3)}`;if(seen.has(k))return;seen.add(k);if(seen.size>80)seen.delete(seen.values().next().value);cq.push({p,u,m});if(cq.length>25)cq.shift();if(!busy)loopChat()}
+  function loopChat(){let b=G('c-box');if(!cq.length){b.classList.remove('show');busy=0;return}busy=1;let c=cq.shift();b.classList.remove('show');setTimeout(()=>{let tg=G('c-tag'),pl=c.p.toLowerCase();tg.textContent=c.p;tg.className='tag '+(pl.includes('yt')?'yt':pl.includes('tt')?'tt':pl.includes('kick')?'kick':'');G('c-user').textContent=c.u+':';G('c-msg').textContent=c.m;b.classList.add('show');setTimeout(loopChat,3e3)},380)}
+
+  function onMsg(raw){try{let m=typeof raw==='string'?JSON.parse(raw):raw;if(!m||typeof m!=='object')return;let v=m.viewers??m.viewerCount??m.viewer_count??m.data?.viewerCount??m.data?.viewers,t=m.total??m.totalViews??m.total_views??m.totalUserCount??m.data?.totalUserCount;if(typeof v==='number')st.nv=v;if(typeof t==='number')st.nt=t;if(typeof v==='number'||typeof t==='number')upd();let p=m.platform||m.source||m.type||(m.event==='chat'?'TT':'LIVE'),u=m.username||m.nickname||m.author||m.chatname||m.data?.nickname||m.data?.uniqueId,tx=m.message||m.comment||m.text||m.chatmessage||m.data?.comment;if(u&&tx)addChat(p,u,tx,m.id||m.msgId||m.data?.msgId);let tr=m.song||m.track||m.music||m.nowPlaying||(m.title&&m.artist?`${m.title} - ${m.artist}`:m.title);if(tr&&!tx)setSong(tr)}catch(e){}}
+  window.addEventListener('message',e=>onMsg(e.data));window.onStreamingInEvent=onMsg;window.updateOverlayData=onMsg;
+
+  async function sync(){
+    if(C.song)setSong(C.song);else if(C.mUrl){try{let d=await(await fetch(C.mUrl,{cache:"no-store"})).json();setSong(d.title||d.song||d.track?.name||(d.item?`${d.item.name} - ${d.item.artists?.[0]?.name||''}`:"")||d.recenttracks?.track?.[0]?.name||"")}catch(e){}}
+    if(C.ytId&&C.ytKey){try{let d=await(await fetch(`https://googleapis.com{C.ytId}&key=${C.ytKey}`,{cache:"no-store"})).json(),it=d.items?.[0];if(it){st.yv=+it.liveStreamingDetails?.concurrentViewers||0;st.yt=+it.statistics?.viewCount||0;if(!C.ytChat&&it.liveStreamingDetails?.activeLiveChatId)C.ytChat=it.liveStreamingDetails.activeLiveChatId}if(C.ytChat){let cd=await(await fetch(`https://googleapis.com{C.ytChat}&part=snippet,authorDetails&maxResults=5&key=${C.ytKey}`,{cache:"no-store"})).json();(cd.items||[]).forEach(m=>addChat('YT',m.authorDetails?.displayName,m.snippet?.displayMessage,m.id))}}catch(e){}}
+    if(C.api){try{let a=await(await fetch(C.api,{cache:"no-store"})).json();st.av=+(a.livestream?.viewer_count??a.viewers??a.viewer_count??0);st.at=+(a.livestream?.views??a.total_views??a.views??0)}catch(e){}}
+    upd();
+  }
+  function wsConn(){if(!C.ws)return;try{let w=new WebSocket(C.ws);w.onmessage=e=>{try{let m=JSON.parse(e.data),v=m.data?.viewerCount??m.viewers??m.viewer_count,t=m.data?.totalUserCount??m.total_views;if(typeof v==='number')st.wv=v;if(typeof t==='number')st.wt=t;upd();if(m.event==='chat'&&m.data)addChat('TT',m.data.nickname||m.data.uniqueId,m.data.comment,m.data.msgId);else if(m.chatmessage&&m.chatname)addChat(m.type||'LIVE',m.chatname,m.chatmessage,m.id);if(m.song||m.track)setSong(m.song||m.track)}catch(x){}};w.onclose=()=>setTimeout(wsConn,5e3)}catch(e){}}
+  if(!C.song&&!C.mUrl)setSong("");wsConn();sync();setInterval(sync,6e3);
+</script>
+</body>
+</html>
