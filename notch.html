@@ -1,157 +1,72 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Right Edge Notch All-in-1</title>
-  <style>
-    @import url('https://googleapis.com');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { display: flex; align-items: center; justify-content: flex-end; background: transparent; font-family: 'Montserrat', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
-
-    .wrap { position: relative; display: inline-flex; padding: 2.5px 0 2.5px 2.5px; border-radius: 28px 0 0 28px; overflow: hidden; background: rgba(255,255,255,.08); box-shadow: -8px 0 28px rgba(0,0,0,.8), -4px 0 20px rgba(56,242,255,.25); transition: all .45s cubic-bezier(.34,1.56,.64,1); }
-    .wrap::before { content: ""; position: absolute; right: -220px; top: 50%; width: 650px; height: 650px; margin-top: -325px; background: conic-gradient(from 0deg, transparent 210deg, #0284c7 270deg, #38f2ff 330deg, #fff 355deg, transparent 360deg); animation: spin 3s linear infinite; }
-    .wrap.alert::before { background: conic-gradient(from 0deg, transparent 210deg, #f59e0b 270deg, #ffd782 330deg, #fff 355deg, transparent 360deg); }
-
-    .notch { position: relative; z-index: 1; display: flex; align-items: center; background: #0d0e12; border-radius: 26px 0 0 26px; padding: 14px 14px 14px 20px; color: #fff; min-height: 76px; max-width: 380px; }
-    .live { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; min-width: 76px; text-align: right; }
-    .wrap.open .live { display: none; }
-    .badge { display: flex; align-items: center; gap: 6px; color: #ff1e56; font-size: 11.5px; font-weight: 900; letter-spacing: 1px; }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff1e56; box-shadow: 0 0 10px #ff1e56; animation: pulse 1.5s infinite; }
-    .dot.ok { box-shadow: 0 0 10px #ff1e56, 0 0 0 2.5px rgba(34,197,94,.85); }
-    .line { width: 100%; height: 1px; background: rgba(255,255,255,.14); }
-    .stat span { display: block; color: #8c8f99; font-size: 8.5px; font-weight: 800; }
-    .stat b { font-size: 16px; font-weight: 800; line-height: 1.1; }
-
-    .card { display: none; align-items: center; gap: 12px; min-width: 245px; overflow: hidden; animation: slide .35s ease; }
-    .wrap.open .card { display: flex; }
-    .pic { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #38f2ff; object-fit: cover; flex-shrink: 0; }
-    .wrap.alert .pic { border-color: #ffd782; }
-    .pic.spin { animation: spin 6s linear infinite; }
-    .info { overflow: hidden; }
-    .tag { display: block; font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #38f2ff; text-transform: uppercase; }
-    .wrap.alert .tag { color: #ffd782; }
-    #title { display: block; font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #desc { display: block; font-size: 11px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    @keyframes pulse { 0%, 100% { transform: scale(.95); opacity: .85; } 50% { transform: scale(1.15); opacity: 1; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Right Notch Blue Overlay</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:transparent;font-family:sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:8px}
+  .notch{background:rgba(5,10,20,.94);border:1.5px solid #3b82f6;border-right:none;border-radius:18px 0 0 18px;color:#fff;box-shadow:-4px 4px 18px rgba(59,130,246,.45);padding:11px 12px 11px 14px;display:flex;flex-direction:column;gap:8px;min-width:104px;max-width:130px}
+  .live{display:flex;align-items:center;gap:5px;background:rgba(59,130,246,.18);border:1px solid rgba(56,189,248,.4);padding:2px 8px;border-radius:99px;width:fit-content}
+  .dot{width:6px;height:6px;background:#38bdf8;border-radius:50%;box-shadow:0 0 8px #38bdf8;animation:pulse 1.5s infinite}
+  .live-txt{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#60a5fa}
+  .stat{display:flex;flex-direction:column}
+  .lbl{font-size:8.5px;font-weight:700;color:#93c5fd;letter-spacing:.5px}
+  .val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .sep{height:1px;background:rgba(59,130,246,.3);width:100%}
+  .music{display:flex;align-items:center;gap:5px;overflow:hidden;width:100%}
+  .music.hide{display:none}
+  .eq{display:flex;align-items:flex-end;gap:1.5px;height:10px;flex-shrink:0}
+  .eq span{width:2px;background:#38bdf8;border-radius:2px;animation:eq .7s infinite alternate}
+  .eq span:nth-child(2){animation-delay:.2s;height:9px}
+  .eq span:nth-child(3){animation-delay:.4s;height:6px}
+  .marquee{overflow:hidden;white-space:nowrap;width:100%}
+  .song{display:inline-block;font-size:10px;font-weight:600;color:#38bdf8;white-space:nowrap}
+  .song.scroll{animation:scroll 7s linear infinite}
+  .chat{background:rgba(5,10,20,.94);border:1.5px solid #3b82f6;border-right:none;border-radius:99px 0 0 99px;color:#fff;box-shadow:-4px 4px 14px rgba(59,130,246,.4);padding:5px 12px;display:flex;align-items:center;gap:6px;height:28px;max-width:88vw;transform:translateX(105%);opacity:0;transition:all .4s ease}
+  .chat.show{transform:translateX(0);opacity:1}
+  .tag{font-size:8px;font-weight:800;padding:1.5px 5px;border-radius:99px;background:#2563eb;color:#fff;text-transform:uppercase;flex-shrink:0}
+  .tag.yt{background:#ef4444}.tag.tt{background:#ec4899}.tag.kick{background:#22c55e;color:#000}
+  .user{font-size:10.5px;font-weight:700;color:#93c5fd;white-space:nowrap;flex-shrink:0}
+  .msg{font-size:10.5px;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes eq{0%{height:3px}100%{height:10px}}
+  @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+</style>
 </head>
 <body>
-  <div class="wrap" id="wrap">
-    <div class="notch">
-      <div class="live">
-        <div class="badge"><i class="dot" id="dot"></i>LIVE</div>
-        <div class="line"></div>
-        <div class="stat"><span>VIEWERS</span><b id="v">0</b></div>
-        <div class="stat"><span>TOTAL</span><b id="t">0</b></div>
-      </div>
-      <div class="card">
-        <img class="pic" id="pic" src="" alt="">
-        <div class="info"><span class="tag" id="tag"></span><b id="title"></b><span id="desc"></span></div>
-      </div>
-    </div>
+  <div class="notch">
+    <div class="live"><div class="dot"></div><span class="live-txt">LIVE</span></div>
+    <div class="stat"><span class="lbl">VIEWERS</span><span class="val" id="v">0</span></div>
+    <div class="sep"></div>
+    <div class="stat"><span class="lbl">TOTAL</span><span class="val" id="t">0</span></div>
+    <div class="sep" id="m-sep"></div>
+    <div class="music" id="m-box"><div class="eq"><span></span><span></span><span></span></div><div class="marquee"><span class="song" id="song">Now Playing</span></div></div>
   </div>
+  <div class="chat" id="c-box"><span class="tag" id="c-tag">LIVE</span><span class="user" id="c-user">User:</span><span class="msg" id="c-msg">Halo!</span></div>
+<script>
+  const q=new URLSearchParams(location.search),G=id=>document.getElementById(id);
+  const C={ytId:q.get('yt_id')||"",ytKey:q.get('yt_key')||"",ytChat:q.get('yt_chat_id')||"",api:q.get('api_url')||"",mUrl:q.get('music_url')||"",song:q.get('song')||"",ws:q.get('ws_url')||"",vp:+q.get('viewers')||0,tp:+q.get('total')||0};
+  let st={nv:0,nt:0,yv:0,yt:0,av:0,at:0,wv:0,wt:0},dp={v:0,t:0},ls="",cq=[],seen=new Set(),busy=0;
 
-  <script>
-    // === EDIT SUARA TTS & IP PC ===
-    const SUARA = { aktif: true, gender: 'pria', nada: 0.78, cepat: 0.96, vol: 1.0, chat: true, join: false };
-    const MANUAL_PC_IP = '';
+  function anim(id,s,e){if(s===e)return;let el=G(id),r=e-s,t0=null;const f=t=>{if(!t0)t0=t;let p=Math.min((t-t0)/600,1);el.textContent=Math.round(s+r*(1-Math.pow(1-p,3))).toLocaleString('id-ID');if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+  function upd(){let v=st.nv+st.yv+st.av+st.wv+C.vp,t=Math.max(dp.t,st.nt+st.yt+st.at+st.wt+C.tp,v);anim('v',dp.v,v);anim('t',dp.t,t);dp={v,t}}
+  function setSong(t){let b=G('m-box'),s=G('m-sep'),e=G('song');if(!t){b.classList.add('hide');s.style.display='none';return}b.classList.remove('hide');s.style.display='block';if(t!==ls){ls=t;e.textContent=t;e.classList.toggle('scroll',t.length>12)}}
+  function addChat(p,u,m,id){if(!u||!m)return;let k=id||`${p}-${u}-${m}-${Math.floor(Date.now()/3e3)}`;if(seen.has(k))return;seen.add(k);if(seen.size>80)seen.delete(seen.values().next().value);cq.push({p,u,m});if(cq.length>25)cq.shift();if(!busy)loopChat()}
+  function loopChat(){let b=G('c-box');if(!cq.length){b.classList.remove('show');busy=0;return}busy=1;let c=cq.shift();b.classList.remove('show');setTimeout(()=>{let tg=G('c-tag'),pl=c.p.toLowerCase();tg.textContent=c.p;tg.className='tag '+(pl.includes('yt')?'yt':pl.includes('tt')?'tt':pl.includes('kick')?'kick':'');G('c-user').textContent=c.u+':';G('c-msg').textContent=c.m;b.classList.add('show');setTimeout(loopChat,3e3)},380)}
 
-    const wrap = document.getElementById('wrap'), dot = document.getElementById('dot'), pic = document.getElementById('pic'), q = [];
-    let busy = false, total = 0, lastV = 0, simV = 0, lastLike = 0, slide = 0, song = { t: 'Live Music Session', a: 'cumaniniajaa • Request di Chat', c: '' };
+  function onMsg(raw){try{let m=typeof raw==='string'?JSON.parse(raw):raw;if(!m||typeof m!=='object')return;let v=m.viewers??m.viewerCount??m.viewer_count??m.data?.viewerCount??m.data?.viewers,t=m.total??m.totalViews??m.total_views??m.totalUserCount??m.data?.totalUserCount;if(typeof v==='number')st.nv=v;if(typeof t==='number')st.nt=t;if(typeof v==='number'||typeof t==='number')upd();let p=m.platform||m.source||m.type||(m.event==='chat'?'TT':'LIVE'),u=m.username||m.nickname||m.author||m.chatname||m.data?.nickname||m.data?.uniqueId,tx=m.message||m.comment||m.text||m.chatmessage||m.data?.comment;if(u&&tx)addChat(p,u,tx,m.id||m.msgId||m.data?.msgId);let tr=m.song||m.track||m.music||m.nowPlaying||(m.title&&m.artist?`${m.title} - ${m.artist}`:m.title);if(tr&&!tx)setSong(tr)}catch(e){}}
+  window.addEventListener('message',e=>onMsg(e.data));window.onStreamingInEvent=onMsg;window.updateOverlayData=onMsg;
 
-    const speak = teks => {
-      if (!SUARA.aktif || !teks || !('speechSynthesis' in window)) return;
-      speechSynthesis.cancel();
-      const u = Object.assign(new SpeechSynthesisUtterance(teks), { lang: 'id-ID', pitch: SUARA.nada, rate: SUARA.cepat, volume: SUARA.vol });
-      const v = speechSynthesis.getVoices().filter(x => x.lang.includes('id'));
-      if (v.length) u.voice = v.find(x => SUARA.gender === 'pria' ? /ardi|male|pria/i.test(x.name) : /gadis|female|wanita/i.test(x.name)) || v;
-      speechSynthesis.speak(u);
-    };
-    if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-
-    const show = (tag, title, desc, img = '', alert = false, spin = false) => {
-      document.getElementById('tag').innerText = tag;
-      document.getElementById('title').innerText = title;
-      document.getElementById('desc').innerText = desc;
-      pic.src = img || `https://dicebear.com{encodeURIComponent(title)}`;
-      pic.classList.toggle('spin', spin);
-      wrap.className = alert ? 'wrap open alert' : 'wrap open';
-    };
-
-    setInterval(() => {
-      if (busy || q.length) return;
-      slide = (slide + 1) % 3;
-      if (slide === 0) wrap.className = 'wrap';
-      else if (slide === 1) show('🎵 NOW PLAYING', song.t, song.a, song.c, false, true);
-      else show('✨ LIVE STREAM', 'Support Doa & Follow', 'Tap-tap layar & kirim gift terbaikmu!', 'https://dicebear.com');
-    }, 5000);
-
-    const next = () => {
-      if (busy || !q.length) return;
-      busy = true;
-      const d = q.shift();
-      show(d.tag, d.t, d.d, d.img, true, d.spin);
-      if (d.tts) speak(d.tts);
-      setTimeout(() => { busy = false; q.length ? next() : (slide = 0, wrap.className = 'wrap'); }, 4200);
-    };
-    const push = (tag, t, d, img = '', tts = '', spin = false) => { q.push({ tag, t, d, img, tts, spin }); next(); };
-
-    const stat = (cur, add = false) => {
-      if (typeof cur === 'number') {
-        document.getElementById('v').innerText = cur.toLocaleString('id-ID');
-        if (cur > lastV) { total += (cur - lastV); document.getElementById('t').innerText = total.toLocaleString('id-ID'); }
-        lastV = cur;
-      } else if (add) {
-        document.getElementById('v').innerText = (++simV).toLocaleString('id-ID');
-        document.getElementById('t').innerText = (++total).toLocaleString('id-ID');
-      }
-    };
-
-    const onEvent = raw => {
-      try {
-        const m = typeof raw === 'string' ? JSON.parse(raw) : raw, d = m.data || m;
-        const tipe = (m.event || m.type || d.type || '').toLowerCase();
-        const nama = d.nickname || d.uniqueId || d.user || d.author || 'Penonton';
-        const foto = d.profilePictureUrl || d.avatar || '';
-        const cur = d.viewerCount ?? d.viewers ?? d.roomInfo?.viewerCount;
-        if (typeof cur === 'number') stat(cur);
-
-        if (/song|music|nowplaying/.test(tipe)) {
-          song = { t: d.title || d.song || 'Musik Diputar', a: d.artist || 'Pemutar Musik PC', c: d.cover || foto };
-          push('🎵 GANTI LAGU', song.t, song.a, song.c, '', true);
-        } else if (/follow|social/.test(tipe)) {
-          stat(null, true); push('➕ NEW FOLLOWER', nama, 'Terima kasih sudah follow!', foto, `Terima kasih ${nama}, sudah follow.`);
-        } else if (tipe === 'gift' && !(d.giftType === 1 && !d.repeatEnd)) {
-          stat(null, true);
-          const jml = (d.repeatCount || d.count || 1) > 1 ? ` x${d.repeatCount || d.count}` : '';
-          push('🎁 NEW GIFT', nama, `Kirim ${d.giftName || 'Gift'}${jml}!`, foto, `Terima kasih ${nama}, sudah kirim ${d.giftName || 'Gift'}.`);
-        } else if (tipe === 'like') {
-          stat(null, true);
-          if (Date.now() - lastLike > 6000) { lastLike = Date.now(); push('❤️ TAP-TAP LAYAR', nama, 'Memberikan like!', foto); }
-        } else if (/member|join/.test(tipe)) {
-          document.getElementById('t').innerText = (++total).toLocaleString('id-ID');
-          push('👋 SELAMAT DATANG', nama, 'Bergabung ke live!', foto, SUARA.join ? `Selamat datang ${nama}` : '');
-        } else if (/chat|comment/.test(tipe) && d.comment) {
-          const teks = d.comment.replace(/[^\p{L}\p{N}\s.,?!]/gu, '').trim();
-          if (teks) push('💬 CHAT & TTS', nama, teks, foto, SUARA.chat ? `${nama} bilang, ${teks}` : '');
-        }
-      } catch (e) {}
-    };
-
-    const ip = new URLSearchParams(location.search).get('ip') || MANUAL_PC_IP || location.hostname || '127.0.0.1';
-    [`ws://${ip}:21213/`, `ws://${ip}:8080`].forEach(u => {
-      const go = () => {
-        const ws = new WebSocket(u);
-        ws.onopen = () => dot.classList.add('ok');
-        ws.onmessage = e => onEvent(e.data);
-        ws.onclose = () => { dot.classList.remove('ok'); setTimeout(go, 3000); };
-        ws.onerror = () => ws.close();
-      };
-      go();
-    });
-  </script>
+  async function sync(){
+    if(C.song)setSong(C.song);else if(C.mUrl){try{let d=await(await fetch(C.mUrl,{cache:"no-store"})).json();setSong(d.title||d.song||d.track?.name||(d.item?`${d.item.name} - ${d.item.artists?.[0]?.name||''}`:"")||d.recenttracks?.track?.[0]?.name||"")}catch(e){}}
+    if(C.ytId&&C.ytKey){try{let d=await(await fetch(`https://googleapis.com{C.ytId}&key=${C.ytKey}`,{cache:"no-store"})).json(),it=d.items?.[0];if(it){st.yv=+it.liveStreamingDetails?.concurrentViewers||0;st.yt=+it.statistics?.viewCount||0;if(!C.ytChat&&it.liveStreamingDetails?.activeLiveChatId)C.ytChat=it.liveStreamingDetails.activeLiveChatId}if(C.ytChat){let cd=await(await fetch(`https://googleapis.com{C.ytChat}&part=snippet,authorDetails&maxResults=5&key=${C.ytKey}`,{cache:"no-store"})).json();(cd.items||[]).forEach(m=>addChat('YT',m.authorDetails?.displayName,m.snippet?.displayMessage,m.id))}}catch(e){}}
+    if(C.api){try{let a=await(await fetch(C.api,{cache:"no-store"})).json();st.av=+(a.livestream?.viewer_count??a.viewers??a.viewer_count??0);st.at=+(a.livestream?.views??a.total_views??a.views??0)}catch(e){}}
+    upd();
+  }
+  function wsConn(){if(!C.ws)return;try{let w=new WebSocket(C.ws);w.onmessage=e=>{try{let m=JSON.parse(e.data),v=m.data?.viewerCount??m.viewers??m.viewer_count,t=m.data?.totalUserCount??m.total_views;if(typeof v==='number')st.wv=v;if(typeof t==='number')st.wt=t;upd();if(m.event==='chat'&&m.data)addChat('TT',m.data.nickname||m.data.uniqueId,m.data.comment,m.data.msgId);else if(m.chatmessage&&m.chatname)addChat(m.type||'LIVE',m.chatname,m.chatmessage,m.id);if(m.song||m.track)setSong(m.song||m.track)}catch(x){}};w.onclose=()=>setTimeout(wsConn,5e3)}catch(e){}}
+  if(!C.song&&!C.mUrl)setSong("");wsConn();sync();setInterval(sync,6e3);
+</script>
 </body>
 </html>
