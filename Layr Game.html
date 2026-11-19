@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=720, height=1280, initial-scale=1.0">
-<title>Layer 4 - Mobile Legends Scene Blackscreen Clean (720p)</title>
+<title>Layer 4 - Mobile Legends Fit 720x1280</title>
 <style>
   * {
     box-sizing: border-box;
@@ -11,23 +11,31 @@
     padding: 0;
   }
 
-  body {
+  html, body {
     width: 720px;
     height: 1280px;
     overflow: hidden;
-    background-color: #160426;
+    background: transparent;
     position: relative;
   }
 
-  /* Latar Belakang Gelombang Ungu di Luar Bingkai */
-  .bg-container {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 45%, #4b127a 0%, #240740 60%, #11021f 100%);
+  /* Kanvas Utama Terpotong Pas 720x1280 dengan Sudut Membulat */
+  .canvas-clip {
+    position: relative;
+    width: 720px;
+    height: 1280px;
+    border-radius: 36px;
     overflow: hidden;
-    z-index: 1;
+    background: radial-gradient(circle at 50% 45%, #4b127a 0%, #240740 60%, #11021f 100%);
+    border: 6px solid rgba(216, 180, 254, 0.5);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
+  /* Gelombang Ungu di Dalam Batas Potongan */
   .wave {
     position: absolute;
     width: 1450px;
@@ -37,6 +45,7 @@
     top: -450px;
     left: -365px;
     animation: drift 14s infinite linear;
+    pointer-events: none;
   }
 
   .wave:nth-child(2) {
@@ -47,6 +56,7 @@
     top: 480px;
     left: -415px;
     animation: drift 20s infinite linear reverse;
+    pointer-events: none;
   }
 
   @keyframes drift {
@@ -54,7 +64,7 @@
     to { transform: rotate(360deg); }
   }
 
-  /* Partikel Bintang Halus di Luar Bingkai */
+  /* Partikel Bintang Halus */
   .sparkles {
     position: absolute;
     inset: 0;
@@ -65,6 +75,7 @@
       radial-gradient(2px 2px at 220px 920px, #d8b4fe, transparent),
       radial-gradient(3px 3px at 540px 1050px, #fff, transparent);
     animation: twinkle 4s infinite alternate ease-in-out;
+    pointer-events: none;
   }
 
   @keyframes twinkle {
@@ -72,23 +83,10 @@
     100% { opacity: 0.95; }
   }
 
-  /* Bingkai Luar Overlay */
-  .frame {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    border: 6px solid rgba(216, 180, 254, 0.5);
-    border-radius: 36px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
   /* Kotak Layar Mobile Legends (Rasio Landscape) Hitam Pekat dengan Glow */
   .game-cutout {
+    position: relative;
+    z-index: 10;
     width: 100%;
     height: 360px;
     margin-top: -120px;
@@ -103,13 +101,10 @@
 </head>
 <body>
 
-  <div class="bg-container">
+  <div class="canvas-clip">
     <div class="wave"></div>
     <div class="wave"></div>
-  </div>
-  <div class="sparkles"></div>
-
-  <div class="frame">
+    <div class="sparkles"></div>
     <div class="game-cutout"></div>
   </div>
 
