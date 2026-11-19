@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=720, height=1280, initial-scale=1.0">
+<title>Layer 3 - Just Chatting Blackscreen Clean (720p)</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    width: 720px;
+    height: 1280px;
+    overflow: hidden;
+    background-color: #160426;
+    position: relative;
+  }
+
+  /* Latar Belakang Gelombang Ungu di Luar Bingkai */
+  .bg-container {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, #4b127a 0%, #240740 60%, #11021f 100%);
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .wave {
+    position: absolute;
+    width: 1450px;
+    height: 1450px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(107, 33, 168, 0.05));
+    border-radius: 43%;
+    top: -400px;
+    left: -365px;
+    animation: drift 14s infinite linear;
+  }
+
+  .wave:nth-child(2) {
+    width: 1550px;
+    height: 1550px;
+    background: linear-gradient(135deg, rgba(216, 180, 254, 0.16), rgba(88, 28, 135, 0.05));
+    border-radius: 47%;
+    top: 450px;
+    left: -415px;
+    animation: drift 20s infinite linear reverse;
+  }
+
+  @keyframes drift {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Partikel Bintang Halus di Luar Bingkai */
+  .sparkles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-image: 
+      radial-gradient(2px 2px at 140px 880px, #fff, transparent),
+      radial-gradient(3px 3px at 520px 980px, #e9d5ff, transparent),
+      radial-gradient(2px 2px at 260px 1120px, #d8b4fe, transparent),
+      radial-gradient(2px 2px at 600px 1180px, #fff, transparent);
+    animation: twinkle 4s infinite alternate ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.35; }
+    100% { opacity: 0.95; }
+  }
+
+  /* Bingkai Luar Overlay */
+  .frame {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    border: 6px solid rgba(216, 180, 254, 0.5);
+    border-radius: 36px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Kotak Kamera Hitam Pekat dengan Glow Ungu */
+  .cam-cutout {
+    width: 100%;
+    height: 740px;
+    border: 4px solid rgba(233, 213, 255, 0.9);
+    border-radius: 24px;
+    background-color: #000000;
+    box-shadow: 
+      0 0 28px rgba(192, 132, 252, 0.75),
+      0 0 12px rgba(233, 213, 255, 0.6);
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-container">
+    <div class="wave"></div>
+    <div class="wave"></div>
+  </div>
+  <div class="sparkles"></div>
+
+  <div class="frame">
+    <div class="cam-cutout"></div>
+  </div>
+
+</body>
+</html>
