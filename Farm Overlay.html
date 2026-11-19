@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>Onyx & Pearl - All In One with Buttons</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background-color: #0e0e11; /* Onyx Hitam */
+    color: #f5f5f7;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* =========================================================
+     TOMBOL KONTROL DI POJOK KIRI ATAS (BESAR & MUDAH DIKLIK)
+     ========================================================= */
+  .control-panel {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 999999;
+    display: flex;
+    gap: 10px;
+    background: rgba(20, 20, 24, 0.95);
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .control-panel button {
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .control-panel button.active {
+    background: #ffffff;
+    color: #000000;
+    font-weight: 800;
+  }
+
+  /* =========================================================
+     PENGATURAN ADEGAN
+     ========================================================= */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 230px 60px 250px 60px;
+    gap: 24px;
+  }
+
+  .scene.active {
+    display: flex;
+  }
+
+  /* Center untuk Starting & Ending */
+  .scene.center-mode {
+    justify-content: center;
+    padding: 60px;
+  }
+
+  /* =========================================================
+     1 & 4. STARTING SOON & ENDING
+     ========================================================= */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 36px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 24px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    transform: rotate(-5deg);
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    animation: blink 1.5s infinite;
+  }
+
+  .title {
+    font-size: 130px;
+    font-weight: 600;
+    line-height: 0.95;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    transform: rotate(-6deg) skewX(-3deg);
+    margin-bottom: 32px;
+  }
+
+  .sub {
+    padding: 18px 48px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 30px;
+    opacity: 0.9;
+    transform: rotate(-5deg);
+  }
+
+  /* =========================================================
+     2. LIVE KAMERA UTAMA
+     ========================================================= */
+  .cam-frame {
+    width: 100%;
+    flex: 1;
+    border-radius: 44px;
+    border: 6px solid #ffffff;
+    background: #00ff00; /* Chroma Key Hijau */
+    position: relative;
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.25);
+  }
+
+  /* =========================================================
+     3. LAYAR GAME + FACECAM
+     ========================================================= */
+  .game-frame {
+    width: 100%;
+    height: 680px;
+    border-radius: 40px;
+    border: 6px solid #ffffff;
+    background: #00ff00; /* Chroma Key Hijau */
+    position: relative;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+
+  .middle-row {
+    width: 100%;
+    height: 320px;
+    display: flex;
+    gap: 22px;
+  }
+
+  .info-card {
+    flex: 1;
+    border-radius: 36px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .info-label {
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .info-title {
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .facecam-frame {
+    width: 380px;
+    height: 100%;
+    border-radius: 36px;
+    border: 6px solid #ffffff;
+    background: #00ff00; /* Chroma Key Hijau */
+  }
+
+  /* =========================================================
+     CAPSULE LIVE MERAH, GOAL BAR & CHAT SLOT
+     ========================================================= */
+  .live-pill {
+    position: absolute;
+    top: 26px;
+    left: 26px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 26px;
+    border-radius: 999px;
+    background: #ff2442;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .goal-box {
+    width: 100%;
+    padding: 18px 32px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .goal-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+  }
+
+  .goal-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+  }
+
+  .goal-fill {
+    width: 45%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 999px;
+  }
+
+  .chat-slot {
+    width: 100%;
+    height: 145px;
+    border-radius: 32px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOMBOL KONTROL -->
+  <div class="control-panel">
+    <button id="btn1" onclick="gantiLayar(1)">Starting</button>
+    <button id="btn2" class="active" onclick="gantiLayar(2)">LIVE Cam</button>
+    <button id="btn3" onclick="gantiLayar(3)">Game</button>
+    <button id="btn4" onclick="gantiLayar(4)">Ending</button>
+  </div>
+
+  <!-- 1. STARTING SOON -->
+  <div class="scene center-mode" id="layar1">
+    <div class="pill"><span class="dot"></span> LIVE SOON</div>
+    <div class="title">STARTING<br>SOON</div>
+    <div class="sub">get comfy, we start soon</div>
+  </div>
+
+  <!-- 2. LIVE KAMERA UTAMA -->
+  <div class="scene active" id="layar2">
+    <div class="cam-frame">
+      <div class="live-pill"><span class="dot"></span> LIVE</div>
+    </div>
+    <div class="goal-box">
+      <div class="goal-text"><span>FOLLOWER GOAL</span><span>90 / 200</span></div>
+      <div class="goal-bar"><div class="goal-fill"></div></div>
+    </div>
+    <div class="chat-slot"></div>
+  </div>
+
+  <!-- 3. LAYAR GAME + FACECAM -->
+  <div class="scene" id="layar3">
+    <div class="game-frame">
+      <div class="live-pill"><span class="dot"></span> LIVE</div>
+    </div>
+    <div class="middle-row">
+      <div class="info-card">
+        <span class="info-label">NOW PLAYING</span>
+        <span class="info-title">Push Rank &amp; Mabar</span>
+        <span class="info-label" style="margin-top:8px;">@username_kamu</span>
+      </div>
+      <div class="facecam-frame"></div>
+    </div>
+    <div class="goal-box">
+      <div class="goal-text"><span>FOLLOWER GOAL</span><span>90 / 200</span></div>
+      <div class="goal-bar"><div class="goal-fill"></div></div>
+    </div>
+    <div class="chat-slot"></div>
+  </div>
+
+  <!-- 4. ENDING -->
+  <div class="scene center-mode" id="layar4">
+    <div class="pill"><span class="dot"></span> STREAM ENDED</div>
+    <div class="title">THANKS FOR<br>WATCHING</div>
+    <div class="sub">follow for the next one</div>
+  </div>
+
+  <script>
+    function gantiLayar(nomor) {
+      document.getElementById('layar1').classList.remove('active');
+      document.getElementById('layar2').classList.remove('active');
+      document.getElementById('layar3').classList.remove('active');
+      document.getElementById('layar4').classList.remove('active');
+
+      document.getElementById('btn1').classList.remove('active');
+      document.getElementById('btn2').classList.remove('active');
+      document.getElementById('btn3').classList.remove('active');
+      document.getElementById('btn4').classList.remove('active');
+
+      document.getElementById('layar' + nomor).classList.add('active');
+      document.getElementById('btn' + nomor).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
